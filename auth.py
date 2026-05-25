@@ -19,7 +19,6 @@ class Authenticator:
 
     def validate_settings(self) -> None:
         """Ensure required Spotify OAuth settings are present."""
-
         missing_vars = [
             name
             for name in (
@@ -36,7 +35,6 @@ class Authenticator:
 
     def create_client(self) -> spotipy.Spotify:
         """Create an authenticated Spotify API client."""
-
         self.validate_settings()
         auth_manager = SpotifyOAuth(
             scope=self.SCOPES,
@@ -47,7 +45,6 @@ class Authenticator:
 
     def authorize_user(self) -> dict:
         """Authorize the user and return their Spotify profile."""
-
         try:
             spotify = self.create_client()
             return spotify.current_user()

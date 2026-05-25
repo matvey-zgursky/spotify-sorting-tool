@@ -5,7 +5,6 @@ from auth import Authenticator
 
 def main() -> None:
     """Run the Spotify favorites manager."""
-
     try:
         load_dotenv()
         authenticator = Authenticator()
