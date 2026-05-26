@@ -1,3 +1,6 @@
+from search import find_start_page_by_added_year
+
+
 ADDED_YEAR = 2025
 PAGE_LIMIT = 50
 
@@ -7,40 +10,6 @@ def _get_saved_tracks_page(spotify, page_index: int) -> dict:
         limit=PAGE_LIMIT,
         offset=page_index * PAGE_LIMIT,
     )
-
-
-def _get_last_item_year(page: dict) -> int:
-    return int(page["items"][-1]["added_at"][:4])
-
-
-def _find_first_page_with_year_at_most(
-    spotify,
-    year: int,
-    total: int,
-) -> int | None:
-    left_page = 0
-    right_page = (total - 1) // PAGE_LIMIT
-    result = None
-
-    while left_page <= right_page:
-        middle_page = (left_page + right_page) // 2
-        page = _get_saved_tracks_page(spotify, middle_page)
-        last_year = _get_last_item_year(page)
-
-        if last_year > year:
-            left_page = middle_page + 1
-        else:
-            result = middle_page
-            right_page = middle_page - 1
-
-    return result
-
-
-def _find_start_page(spotify, year: int, total: int) -> int | None:
-    if total <= PAGE_LIMIT:
-        return 0
-
-    return _find_first_page_with_year_at_most(spotify, year, total)
 
 
 def _get_page_for_collection(spotify, first_page: dict, page_index: int) -> dict:
@@ -90,7 +59,12 @@ def get_liked_track_uris_by_added_year(
     if total == 0 or not first_page.get("items"):
         return []
 
-    start_page = _find_start_page(spotify, year, total)
+    start_page = find_start_page_by_added_year(
+        lambda page_index: _get_saved_tracks_page(spotify, page_index),
+        year,
+        total,
+        PAGE_LIMIT,
+    )
 
     if start_page is None:
         return []
