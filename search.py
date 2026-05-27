@@ -1,10 +1,10 @@
 from collections.abc import Callable
 
-
 PageGetter = Callable[[int], dict]
 
 
 def _get_last_item_year(page: dict) -> int:
+    """Вернуть год добавления последнего трека на странице."""
     return int(page["items"][-1]["added_at"][:4])
 
 
@@ -14,6 +14,7 @@ def _find_first_page_not_newer_than_year(
     total: int,
     page_limit: int,
 ) -> int | None:
+    """Найти первую страницу, где последний трек добавлен не позже указанного года."""
     left_page = 0
     right_page = (total - 1) // page_limit
     result = None
@@ -38,6 +39,7 @@ def find_start_page_by_added_year(
     total: int,
     page_limit: int,
 ) -> int | None:
+    """Вернуть первую страницу, с которой стоит искать треки за указанный год."""
     if total <= page_limit:
         return 0
 
