@@ -1,9 +1,15 @@
+from collections.abc import Callable
+
+
+PageGetter = Callable[[int], dict]
+
+
 def _get_last_item_year(page: dict) -> int:
     return int(page["items"][-1]["added_at"][:4])
 
 
-def _find_first_page_with_year_at_most(
-    get_page,
+def _find_first_page_not_newer_than_year(
+    get_page: PageGetter,
     year: int,
     total: int,
     page_limit: int,
@@ -27,7 +33,7 @@ def _find_first_page_with_year_at_most(
 
 
 def find_start_page_by_added_year(
-    get_page,
+    get_page: PageGetter,
     year: int,
     total: int,
     page_limit: int,
@@ -35,4 +41,4 @@ def find_start_page_by_added_year(
     if total <= page_limit:
         return 0
 
-    return _find_first_page_with_year_at_most(get_page, year, total, page_limit)
+    return _find_first_page_not_newer_than_year(get_page, year, total, page_limit)
