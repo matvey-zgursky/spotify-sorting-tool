@@ -5,7 +5,7 @@ from spotipy.oauth2 import SpotifyOAuth
 
 
 class Authenticator:
-    """Handles Spotify OAuth setup and user authorization."""
+    """Настраивает OAuth и создает клиент Spotify."""
 
     SCOPES = (
         "user-library-read "
@@ -17,7 +17,7 @@ class Authenticator:
     TOKEN_CACHE_PATH = ".spotify_token_cache"
 
     def validate_settings(self) -> None:
-        """Ensure required Spotify OAuth settings are present."""
+        """Проверить наличие обязательных настроек Spotify OAuth."""
         missing_vars = [
             name
             for name in (
@@ -33,7 +33,7 @@ class Authenticator:
             )
 
     def create_client(self) -> spotipy.Spotify:
-        """Create an authenticated Spotify API client."""
+        """Создать авторизованный клиент Spotify API."""
         self.validate_settings()
         auth_manager = SpotifyOAuth(
             scope=self.SCOPES,

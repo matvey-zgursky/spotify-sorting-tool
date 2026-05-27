@@ -5,7 +5,7 @@ from media_library import ADDED_YEAR, LikedTracks
 
 
 def main() -> None:
-    """Run the Spotify favorites manager."""
+    """Запустить менеджер любимых треков Spotify."""
     try:
         load_dotenv()
         authenticator = Authenticator()
