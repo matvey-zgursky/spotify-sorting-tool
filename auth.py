@@ -1,7 +1,6 @@
 import os
 
 import spotipy
-from spotipy.exceptions import SpotifyOauthError
 from spotipy.oauth2 import SpotifyOAuth
 
 
@@ -42,12 +41,3 @@ class Authenticator:
             open_browser=False,
         )
         return spotipy.Spotify(auth_manager=auth_manager)
-
-    def authorize_user(self) -> dict:
-        """Authorize the user and return their Spotify profile."""
-        try:
-            spotify = self.create_client()
-            return spotify.current_user()
-        except SpotifyOauthError as error:
-            print(f"Spotify authorization failed: {error}")
-            raise SystemExit(1)
