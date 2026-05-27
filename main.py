@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 
 from auth import Authenticator
-from media_library import ADDED_YEAR, get_liked_track_uris_by_added_year
+from media_library import ADDED_YEAR, LikedTracks
 
 
 def main() -> None:
@@ -14,7 +14,8 @@ def main() -> None:
         display_name = user.get("display_name") or user.get("id")
         print(f"Authorized in Spotify as: {display_name}")
 
-        track_uris = get_liked_track_uris_by_added_year(spotify)
+        liked_tracks = LikedTracks(spotify)
+        track_uris = liked_tracks.get_uris_by_added_year()
         if not track_uris:
             print(f"No liked tracks found for {ADDED_YEAR}.")
             return
