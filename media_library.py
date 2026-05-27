@@ -7,7 +7,7 @@ SAVED_TRACKS_PAGE_LIMIT = 50
 
 
 class LikedTracks:
-    """Works with the current user's liked Spotify tracks."""
+    """Работает с любимыми треками текущего пользователя Spotify."""
 
     def __init__(
         self,
@@ -18,6 +18,7 @@ class LikedTracks:
         self.page_limit = page_limit
 
     def _get_saved_tracks_page(self, page_index: int) -> dict:
+        """Вернуть страницу любимых треков по ее номеру."""
         return self.spotify.current_user_saved_tracks(
             limit=self.page_limit,
             offset=page_index * self.page_limit,
@@ -29,6 +30,7 @@ class LikedTracks:
         start_page: int,
         year: int,
     ) -> list[str]:
+        """Собрать URI любимых треков за год, начиная с указанной страницы."""
         track_uris = []
         page_index = start_page
 
@@ -58,7 +60,7 @@ class LikedTracks:
         self,
         year: int = ADDED_YEAR,
     ) -> list[str]:
-        """Return liked track URIs filtered by the year they were added."""
+        """Вернуть URI любимых треков, добавленных в указанном году."""
         first_page = self._get_saved_tracks_page(0)
         total = first_page["total"]
 
