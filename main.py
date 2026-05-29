@@ -2,6 +2,8 @@ from dotenv import load_dotenv
 
 from auth import Authenticator
 from media_library import ADDED_YEAR, LikedTracks
+from playlist import PlaylistManager, TargetPlaylistSelector
+from user_interface import UserInterface
 
 
 def main() -> None:
@@ -11,8 +13,17 @@ def main() -> None:
         authenticator = Authenticator()
         spotify = authenticator.create_client()
         user = spotify.current_user()
-        display_name = user.get("display_name") or user.get("id")
-        print(f"Authorized in Spotify as: {display_name}")
+        ui = UserInterface()
+        ui.show_authorized_user(user)
+
+        playlist_manager = PlaylistManager(spotify, user["id"])
+        playlist_selector = TargetPlaylistSelector(playlist_manager, ui)
+        target_playlist = playlist_selector.select()
+        if target_playlist is None:
+            ui.show_no_target_playlist_selected()
+            return
+
+        ui.show_selected_playlist(target_playlist)
 
         liked_tracks = LikedTracks(spotify)
         track_uris = liked_tracks.get_uris_by_added_year()
