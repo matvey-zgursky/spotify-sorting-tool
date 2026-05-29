@@ -78,16 +78,14 @@ class UserInterface:
         print("No target playlist selected.")
 
     def _format_playlist(self, playlist: dict) -> str:
+        """Вернуть строку с названием и URL плейлиста."""
         return f"{playlist.get('name')} ({self._get_playlist_url(playlist)})"
 
     def _get_playlist_url(self, playlist: dict) -> str:
+        """Вернуть URL плейлиста Spotify или запасное значение, при отсутствии."""
         external_urls = playlist.get("external_urls") or {}
         spotify_url = external_urls.get("spotify")
         if spotify_url:
             return spotify_url
-
-        playlist_id = playlist.get("id")
-        if playlist_id:
-            return f"https://open.spotify.com/playlist/{playlist_id}"
 
         return "unknown URL"
