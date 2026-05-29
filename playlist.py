@@ -167,6 +167,7 @@ class TargetPlaylistSelector:
         return self.user_interface.choose_playlist(editable_playlists)
 
     def _handle_not_found_by_name(self, name: str) -> dict | bool | None:
+        """Обработать отсутствие плейлиста при поиске по имени."""
         if self.user_interface.ask_enter_another_playlist():
             return True
 
@@ -176,6 +177,7 @@ class TargetPlaylistSelector:
         return None
 
     def _handle_not_found_by_url(self) -> dict | bool | None:
+        """Обработать отсутствие плейлиста при поиске по URL/URI."""
         if self.user_interface.ask_enter_another_playlist():
             return True
 
