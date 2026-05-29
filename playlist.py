@@ -1,7 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 from urllib.parse import urlparse
+
+import spotipy
 
 if TYPE_CHECKING:
     from user_interface import UserInterface
@@ -14,7 +16,7 @@ class PlaylistManager:
 
     def __init__(
         self,
-        spotify: Any,
+        spotify: spotipy.Spotify,
         current_user_id: str,
         page_limit: int = PLAYLIST_PAGE_LIMIT,
     ) -> None:
