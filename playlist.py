@@ -123,17 +123,17 @@ class TargetPlaylistSelector:
             )
 
             if playlist_id:
-                result = self._select_by_id(playlist_id)
+                result = self._handle_playlist_id(playlist_id)
             else:
-                result = self._select_by_name(playlist_name_or_url)
+                result = self._handle_playlist_name(playlist_name_or_url)
 
             if result is True:
                 continue
 
             return result
 
-    def _select_by_id(self, playlist_id: str) -> dict | bool | None:
-        """Выбрать плейлист по id или обработать неудачный поиск."""
+    def _handle_playlist_id(self, playlist_id: str) -> dict | bool | None:
+        """Обработать выбор плейлиста по id."""
         playlist = self.playlist_manager.find_by_id(playlist_id)
         if playlist is None:
             self.user_interface.show_playlist_not_found()
@@ -145,8 +145,8 @@ class TargetPlaylistSelector:
 
         return playlist
 
-    def _select_by_name(self, name: str) -> dict | bool | None:
-        """Выбрать плейлист по имени или обработать неудачный поиск."""
+    def _handle_playlist_name(self, name: str) -> dict | bool | None:
+        """Обработать выбор плейлиста по имени."""
         matching_playlists = self.playlist_manager.find_by_name(name)
         if not matching_playlists:
             self.user_interface.show_playlist_not_found()
