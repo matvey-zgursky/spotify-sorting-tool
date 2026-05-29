@@ -73,9 +73,19 @@ class PlaylistManager:
 
     def extract_playlist_id(self, value: str) -> str | None:
         """Вернуть id плейлиста из URL/URI Spotify или None."""
+        return self._extract_playlist_id_from_uri(value) or (
+            self._extract_playlist_id_from_url(value)
+        )
+
+    def _extract_playlist_id_from_uri(self, value: str) -> str | None:
+        """Вернуть id плейлиста из Spotify URI или None."""
         if value.startswith("spotify:playlist:"):
             return value.removeprefix("spotify:playlist:").strip() or None
 
+        return None
+
+    def _extract_playlist_id_from_url(self, value: str) -> str | None:
+        """Вернуть id плейлиста из URL Spotify или None."""
         parsed_url = urlparse(value)
         if not parsed_url.scheme or not parsed_url.netloc:
             return None
