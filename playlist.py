@@ -115,7 +115,7 @@ class TargetPlaylistSelector:
         self.user_interface = user_interface
 
     def select(self) -> dict | None:
-        """Запросить и вернуть целевой плейлист или None при отказе."""
+        """Запросить и вернуть плейлист или None при отказе."""
         while True:
             playlist_name_or_url = self.user_interface.ask_playlist_name_or_url()
             playlist_id = self.playlist_manager.extract_playlist_id(
@@ -123,45 +123,48 @@ class TargetPlaylistSelector:
             )
 
             if playlist_id:
-                playlist = self.playlist_manager.find_by_id(playlist_id)
-                if playlist is None:
-                    self.user_interface.show_playlist_not_found()
-                    result = self._handle_not_found_by_url()
-                    if result is True:
-                        continue
+                result = self._select_by_id(playlist_id)
+            else:
+                result = self._select_by_name(playlist_name_or_url)
 
-                    return result
-
-                if not self.playlist_manager.can_add_tracks(playlist):
-                    self.user_interface.show_no_permission()
-                    continue
-
-                return playlist
-
-            matching_playlists = self.playlist_manager.find_by_name(
-                playlist_name_or_url,
-            )
-            if not matching_playlists:
-                self.user_interface.show_playlist_not_found()
-                result = self._handle_not_found_by_name(playlist_name_or_url)
-                if result is True:
-                    continue
-
-                return result
-
-            editable_playlists = [
-                playlist
-                for playlist in matching_playlists
-                if self.playlist_manager.can_add_tracks(playlist)
-            ]
-            if not editable_playlists:
-                self.user_interface.show_no_permission()
+            if result is True:
                 continue
 
-            if len(editable_playlists) == 1:
-                return editable_playlists[0]
+            return result
 
-            return self.user_interface.choose_playlist(editable_playlists)
+    def _select_by_id(self, playlist_id: str) -> dict | bool | None:
+        """Выбрать плейлист по id или обработать неудачный поиск."""
+        playlist = self.playlist_manager.find_by_id(playlist_id)
+        if playlist is None:
+            self.user_interface.show_playlist_not_found()
+            return self._handle_not_found_by_url()
+
+        if not self.playlist_manager.can_add_tracks(playlist):
+            self.user_interface.show_no_permission()
+            return True
+
+        return playlist
+
+    def _select_by_name(self, name: str) -> dict | bool | None:
+        """Выбрать плейлист по имени или обработать неудачный поиск."""
+        matching_playlists = self.playlist_manager.find_by_name(name)
+        if not matching_playlists:
+            self.user_interface.show_playlist_not_found()
+            return self._handle_not_found_by_name(name)
+
+        editable_playlists = [
+            playlist
+            for playlist in matching_playlists
+            if self.playlist_manager.can_add_tracks(playlist)
+        ]
+        if not editable_playlists:
+            self.user_interface.show_no_permission()
+            return True
+
+        if len(editable_playlists) == 1:
+            return editable_playlists[0]
+
+        return self.user_interface.choose_playlist(editable_playlists)
 
     def _handle_not_found_by_name(self, name: str) -> dict | bool | None:
         if self.user_interface.ask_enter_another_playlist():
