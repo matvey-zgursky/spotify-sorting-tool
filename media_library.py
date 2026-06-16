@@ -2,7 +2,7 @@ import spotipy
 
 from search import find_start_page_by_added_year
 
-ADDED_YEAR = 2025
+
 SAVED_TRACKS_PAGE_LIMIT = 50
 
 
@@ -58,7 +58,7 @@ class LikedTracks:
 
     def get_uris_by_added_year(
         self,
-        year: int = ADDED_YEAR,
+        year: int,
     ) -> list[str]:
         """Вернуть URI любимых треков, добавленных в указанном году."""
         first_page = self._get_saved_tracks_page(0)

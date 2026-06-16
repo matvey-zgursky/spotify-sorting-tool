@@ -1,3 +1,14 @@
+from __future__ import annotations
+
+from datetime import date
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from playlist import AddTracksResult
+
+MIN_SPOTIFY_YEAR = 2008
+
+
 class UserInterface:
     """Отвечает за взаимодействие с пользователем в консоли."""
 
@@ -14,6 +25,25 @@ class UserInterface:
                 return value
 
             print("Playlist name or URL cannot be empty.")
+
+    def ask_added_year(self) -> int:
+        """Запросить год добавления любимых треков."""
+        while True:
+            value = input("Enter added year: ").strip()
+            if not value:
+                print("Year cannot be empty.")
+            elif not value.isdigit():
+                print("Year must contain only digits.")
+            elif len(value) != 4:
+                print("Year must contain exactly 4 digits.")
+            elif int(value) <= 0:
+                print("Year must be greater than 0.")
+            elif int(value) < MIN_SPOTIFY_YEAR:
+                print(f"Year cannot be earlier than {MIN_SPOTIFY_YEAR}.")
+            elif int(value) > date.today().year:
+                print("Year cannot be in the future.")
+            else:
+                return int(value)
 
     def ask_enter_another_playlist(self) -> bool:
         """Спросить, хочет ли пользователь ввести другой плейлист."""
@@ -76,6 +106,23 @@ class UserInterface:
     def show_no_target_playlist_selected(self) -> None:
         """Сообщить, что пользователь не выбрал целевой плейлист."""
         print("No target playlist selected.")
+
+    def show_selected_tracks_count(self, tracks_count: int, year: int) -> None:
+        """Показать количество выбранных любимых треков."""
+        print(f"Found {tracks_count} liked tracks added in {year}.")
+
+    def ask_confirm_tracks_transfer(self) -> bool:
+        """Спросить, подтверждает ли пользователь перенос треков."""
+        return self.ask_yes_no("Do you want to transfer these tracks?")
+
+    def show_tracks_transfer_cancelled(self) -> None:
+        """Сообщить, что пользователь отменил перенос треков."""
+        print("Tracks transfer cancelled.")
+
+    def show_tracks_added(self, result: AddTracksResult, playlist: dict) -> None:
+        """Показать результат добавления треков в плейлист."""
+        formatted_playlist = self._format_playlist(playlist)
+        print(f"Added {result.added_count} tracks to playlist: {formatted_playlist}.")
 
     def _format_playlist(self, playlist: dict) -> str:
         """Вернуть строку с названием и URL плейлиста."""

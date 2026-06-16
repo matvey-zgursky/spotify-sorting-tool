@@ -1,8 +1,8 @@
 from dotenv import load_dotenv
 
 from auth import Authenticator
-from media_library import ADDED_YEAR, LikedTracks
-from playlist import PlaylistManager, TargetPlaylistSelector
+from media_library import LikedTracks
+from playlist import PlaylistManager, PlaylistTrackAdder, TargetPlaylistSelector
 from user_interface import UserInterface
 
 
@@ -15,6 +15,7 @@ def main() -> None:
         user = spotify.current_user()
         ui = UserInterface()
         ui.show_authorized_user(user)
+        year = ui.ask_added_year()
 
         playlist_manager = PlaylistManager(spotify, user["id"])
         playlist_selector = TargetPlaylistSelector(playlist_manager, ui)
@@ -26,14 +27,19 @@ def main() -> None:
         ui.show_selected_playlist(target_playlist)
 
         liked_tracks = LikedTracks(spotify)
-        track_uris = liked_tracks.get_uris_by_added_year()
+        track_uris = liked_tracks.get_uris_by_added_year(year)
         if not track_uris:
-            print(f"No liked tracks found for {ADDED_YEAR}.")
+            print(f"No liked tracks found for {year}.")
             return
 
-        print(f"Liked track URIs added in {ADDED_YEAR}:")
-        for index, track_uri in enumerate(track_uris, start=1):
-            print(f"{index}. {track_uri}")
+        ui.show_selected_tracks_count(len(track_uris), year)
+        if not ui.ask_confirm_tracks_transfer():
+            ui.show_tracks_transfer_cancelled()
+            return
+
+        track_adder = PlaylistTrackAdder(spotify)
+        result = track_adder.add_tracks(target_playlist["id"], track_uris)
+        ui.show_tracks_added(result, target_playlist)
     except Exception as error:
         print(f"Program failed: {error}")
         raise SystemExit(1)

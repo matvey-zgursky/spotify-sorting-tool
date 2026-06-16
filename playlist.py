@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 
@@ -9,6 +10,51 @@ if TYPE_CHECKING:
     from user_interface import UserInterface
 
 PLAYLIST_PAGE_LIMIT = 50
+ADD_ITEMS_LIMIT = 100
+
+
+@dataclass(frozen=True)
+class AddTracksResult:
+    """Результат добавления треков в плейлист."""
+
+    found_count: int
+    added_count: int
+
+
+class PlaylistTrackAdder:
+    """Добавляет треки в плейлист."""
+
+    def __init__(
+        self,
+        spotify: spotipy.Spotify,
+        add_limit: int = ADD_ITEMS_LIMIT,
+    ) -> None:
+        self.spotify = spotify
+        self.add_limit = add_limit
+
+    def add_tracks(
+        self,
+        playlist_id: str,
+        track_uris: list[str],
+    ) -> AddTracksResult:
+        """Добавить URI треков в плейлист."""
+        for chunk in self._chunk_uris(track_uris):
+            self.spotify.playlist_add_items(playlist_id, chunk)
+
+        return AddTracksResult(
+            found_count=len(track_uris),
+            added_count=len(track_uris),
+        )
+
+    def _chunk_uris(
+        self,
+        track_uris: list[str],
+    ) -> list[list[str]]:
+        """Разбить URI на пачки допустимого размера для Spotify API."""
+        return [
+            track_uris[index : index + self.add_limit]
+            for index in range(0, len(track_uris), self.add_limit)
+        ]
 
 
 class PlaylistManager:
