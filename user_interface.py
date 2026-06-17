@@ -111,6 +111,10 @@ class UserInterface:
         """Показать количество выбранных любимых треков."""
         print(f"Found {tracks_count} liked tracks added in {year}.")
 
+    def show_liked_tracks_search_started(self, year: int) -> None:
+        """Сообщить, что поиск любимых треков начался."""
+        print(f"Searching liked tracks added in {year}...")
+
     def ask_confirm_tracks_transfer(self) -> bool:
         """Спросить, подтверждает ли пользователь перенос треков."""
         return self.ask_yes_no("Do you want to transfer these tracks?")
@@ -119,10 +123,17 @@ class UserInterface:
         """Сообщить, что пользователь отменил перенос треков."""
         print("Tracks transfer cancelled.")
 
+    def show_tracks_transfer_started(self) -> None:
+        """Сообщить, что перенос треков начался."""
+        print("Adding tracks to playlist...")
+
     def show_tracks_added(self, result: AddTracksResult, playlist: dict) -> None:
         """Показать результат добавления треков в плейлист."""
         formatted_playlist = self._format_playlist(playlist)
-        print(f"Added {result.added_count} tracks to playlist: {formatted_playlist}.")
+        print(
+            f"Added {result.added_count} tracks to playlist: {formatted_playlist}. "
+            f"Skipped {result.skipped_count} duplicates.",
+        )
 
     def _format_playlist(self, playlist: dict) -> str:
         """Вернуть строку с названием и URL плейлиста."""

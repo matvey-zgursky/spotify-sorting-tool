@@ -26,6 +26,7 @@ def main() -> None:
 
         ui.show_selected_playlist(target_playlist)
 
+        ui.show_liked_tracks_search_started(year)
         liked_tracks = LikedTracks(spotify)
         track_uris = liked_tracks.get_uris_by_added_year(year)
         if not track_uris:
@@ -37,6 +38,7 @@ def main() -> None:
             ui.show_tracks_transfer_cancelled()
             return
 
+        ui.show_tracks_transfer_started()
         track_adder = PlaylistTrackAdder(spotify)
         result = track_adder.add_tracks(target_playlist["id"], track_uris)
         ui.show_tracks_added(result, target_playlist)
