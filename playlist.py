@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 
@@ -9,6 +10,104 @@ if TYPE_CHECKING:
     from user_interface import UserInterface
 
 PLAYLIST_PAGE_LIMIT = 50
+ADD_ITEMS_LIMIT = 100
+PLAYLIST_ITEMS_LIMIT = 100
+
+
+@dataclass(frozen=True)
+class AddTracksResult:
+    """Результат добавления треков в плейлист."""
+
+    found_count: int
+    added_count: int
+    skipped_count: int
+
+
+class PlaylistTrackAdder:
+    """Добавляет треки в плейлист."""
+
+    def __init__(
+        self,
+        spotify: spotipy.Spotify,
+        add_limit: int = ADD_ITEMS_LIMIT,
+        read_limit: int = PLAYLIST_ITEMS_LIMIT,
+    ) -> None:
+        self.spotify = spotify
+        self.add_limit = add_limit
+        self.read_limit = read_limit
+
+    def add_tracks(
+        self,
+        playlist_id: str,
+        track_uris: list[str],
+    ) -> AddTracksResult:
+        """Добавить в плейлист отсутствующие в нем треки."""
+        new_track_uris = self._exclude_existing_track_uris(
+            playlist_id,
+            track_uris,
+        )
+
+        for chunk in self._split_track_uris_chunks(new_track_uris):
+            self.spotify.playlist_add_items(playlist_id, chunk)
+
+        return AddTracksResult(
+            found_count=len(track_uris),
+            added_count=len(new_track_uris),
+            skipped_count=len(track_uris) - len(new_track_uris),
+        )
+
+    def _exclude_existing_track_uris(
+        self,
+        playlist_id: str,
+        track_uris: list[str],
+    ) -> list[str]:
+        """Вернуть URI треков, которых еще нет в плейлисте."""
+        known_track_uris = self._get_playlist_track_uris(playlist_id)
+        new_track_uris = []
+
+        for track_uri in track_uris:
+            if track_uri not in known_track_uris:
+                new_track_uris.append(track_uri)
+                known_track_uris.add(track_uri)
+
+        return new_track_uris
+
+    def _get_playlist_track_uris(self, playlist_id: str) -> set[str]:
+        """Вернуть URI всех треков плейлиста."""
+        track_uris = set()
+        offset = 0
+
+        while True:
+            page = self.spotify.playlist_items(
+                playlist_id,
+                limit=self.read_limit,
+                offset=offset,
+            )
+
+            items = page.get("items", [])
+
+            for item in items:
+                track = item.get("item") or {}
+                track_uri = track.get("uri")
+                if track_uri:
+                    track_uris.add(track_uri)
+
+            if not page.get("next"):
+                break
+
+            offset += self.read_limit
+
+        return track_uris
+
+    def _split_track_uris_chunks(
+        self,
+        track_uris: list[str],
+    ) -> list[list[str]]:
+        """Разбить URI на пачки допустимого размера для Spotify API."""
+        return [
+            track_uris[index : index + self.add_limit]
+            for index in range(0, len(track_uris), self.add_limit)
+        ]
 
 
 class PlaylistManager:
