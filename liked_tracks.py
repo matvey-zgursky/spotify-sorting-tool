@@ -1,8 +1,5 @@
 import spotipy
 
-from search import find_start_page_by_added_year
-
-
 SAVED_TRACKS_PAGE_LIMIT = 50
 
 
@@ -23,6 +20,44 @@ class LikedTracks:
             limit=self.page_limit,
             offset=page_index * self.page_limit,
         )
+
+    def _get_last_item_year(self, page: dict) -> int:
+        """Вернуть год добавления последнего трека на странице."""
+        return int(page["items"][-1]["added_at"][:4])
+
+    def _find_first_page_not_newer_than_year(
+        self,
+        year: int,
+        total: int,
+    ) -> int | None:
+        """Найти первую страницу, где последний трек добавлен не позже указанного года."""
+        left_page = 0
+        right_page = (total - 1) // self.page_limit
+        result = None
+
+        while left_page <= right_page:
+            middle_page = (left_page + right_page) // 2
+            page = self._get_saved_tracks_page(middle_page)
+            last_year = self._get_last_item_year(page)
+
+            if last_year > year:
+                left_page = middle_page + 1
+            else:
+                result = middle_page
+                right_page = middle_page - 1
+
+        return result
+
+    def _find_start_page_by_added_year(
+        self,
+        year: int,
+        total: int,
+    ) -> int | None:
+        """Вернуть первую страницу, с которой стоит искать треки за указанный год."""
+        if total <= self.page_limit:
+            return 0
+
+        return self._find_first_page_not_newer_than_year(year, total)
 
     def _collect_track_uris_starting_from_page(
         self,
@@ -67,11 +102,9 @@ class LikedTracks:
         if total == 0:
             return []
 
-        start_page = find_start_page_by_added_year(
-            self._get_saved_tracks_page,
+        start_page = self._find_start_page_by_added_year(
             year,
             total,
-            self.page_limit,
         )
 
         if start_page is None:
