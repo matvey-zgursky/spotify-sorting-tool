@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 
 from auth import Authenticator
-from media_library import LikedTracks
+from liked_tracks import LikedTracks
 from playlist import PlaylistManager, PlaylistTrackAdder, TargetPlaylistSelector
 from user_interface import UserInterface
 
