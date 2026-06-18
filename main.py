@@ -1,47 +1,14 @@
 from dotenv import load_dotenv
 
-from auth import Authenticator
-from liked_tracks import LikedTracks
-from playlist import PlaylistManager, PlaylistTrackAdder, TargetPlaylistSelector
-from user_interface import UserInterface
+from app import App
 
 
 def main() -> None:
     """Запустить менеджер любимых треков Spotify."""
     try:
         load_dotenv()
-        authenticator = Authenticator()
-        spotify = authenticator.create_client()
-        user = spotify.current_user()
-        ui = UserInterface()
-        ui.show_authorized_user(user)
-        year = ui.ask_added_year()
-
-        playlist_manager = PlaylistManager(spotify, user["id"])
-        playlist_selector = TargetPlaylistSelector(playlist_manager, ui)
-        target_playlist = playlist_selector.select()
-        if target_playlist is None:
-            ui.show_no_target_playlist_selected()
-            return
-
-        ui.show_selected_playlist(target_playlist)
-
-        ui.show_liked_tracks_search_started(year)
-        liked_tracks = LikedTracks(spotify)
-        track_uris = liked_tracks.get_uris_by_added_year(year)
-        if not track_uris:
-            print(f"No liked tracks found for {year}.")
-            return
-
-        ui.show_selected_tracks_count(len(track_uris), year)
-        if not ui.ask_confirm_tracks_transfer():
-            ui.show_tracks_transfer_cancelled()
-            return
-
-        ui.show_tracks_transfer_started()
-        track_adder = PlaylistTrackAdder(spotify)
-        result = track_adder.add_tracks(target_playlist["id"], track_uris)
-        ui.show_tracks_added(result, target_playlist)
+        app = App.create()
+        app.run()
     except Exception as error:
         print(f"Program failed: {error}")
         raise SystemExit(1)

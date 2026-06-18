@@ -111,6 +111,10 @@ class UserInterface:
         """Показать количество выбранных любимых треков."""
         print(f"Found {tracks_count} liked tracks added in {year}.")
 
+    def show_no_liked_tracks_found(self, year: int) -> None:
+        """Сообщить, что любимые треки за год не найдены."""
+        print(f"No liked tracks found for {year}.")
+
     def show_liked_tracks_search_started(self, year: int) -> None:
         """Сообщить, что поиск любимых треков начался."""
         print(f"Searching liked tracks added in {year}...")
