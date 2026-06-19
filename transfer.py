@@ -1,6 +1,6 @@
 from liked_tracks import LikedTracks
 from playlist import PlaylistTrackAdder, TargetPlaylistSelector
-from user_interface import UserInterface
+from ui import UserInterface
 
 
 class TransferLikedTracksWorkflow:

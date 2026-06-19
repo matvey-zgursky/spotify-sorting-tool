@@ -6,7 +6,7 @@ from actions import UserAction
 from liked_tracks import LikedTracks
 from playlist import PlaylistManager, PlaylistTrackAdder, TargetPlaylistSelector
 from transfer import TransferLikedTracksWorkflow
-from user_interface import UserInterface
+from ui import UserInterface
 
 
 class Workflow(Protocol):
