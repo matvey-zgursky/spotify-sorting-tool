@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 import spotipy
 
 if TYPE_CHECKING:
-    from user_interface import UserInterface
+    from ui import UserInterface
 
 PLAYLIST_PAGE_LIMIT = 50
 ADD_ITEMS_LIMIT = 100
@@ -208,15 +208,15 @@ class TargetPlaylistSelector:
     def __init__(
         self,
         playlist_manager: PlaylistManager,
-        user_interface: UserInterface,
+        ui: UserInterface,
     ) -> None:
         self.playlist_manager = playlist_manager
-        self.user_interface = user_interface
+        self.ui = ui
 
     def select(self) -> dict | None:
         """Запросить и вернуть плейлист или None при отказе."""
         while True:
-            playlist_name_or_url = self.user_interface.ask_playlist_name_or_url()
+            playlist_name_or_url = self.ui.ask_playlist_name_or_url()
             playlist_id = self.playlist_manager.extract_playlist_id(
                 playlist_name_or_url,
             )
@@ -235,11 +235,11 @@ class TargetPlaylistSelector:
         """Обработать выбор плейлиста по id."""
         playlist = self.playlist_manager.find_by_id(playlist_id)
         if playlist is None:
-            self.user_interface.show_playlist_not_found()
+            self.ui.show_playlist_not_found()
             return self._handle_not_found_by_url()
 
         if not self.playlist_manager.can_add_tracks(playlist):
-            self.user_interface.show_no_permission()
+            self.ui.show_no_permission()
             return True
 
         return playlist
@@ -248,7 +248,7 @@ class TargetPlaylistSelector:
         """Обработать выбор плейлиста по имени."""
         matching_playlists = self.playlist_manager.find_by_name(name)
         if not matching_playlists:
-            self.user_interface.show_playlist_not_found()
+            self.ui.show_playlist_not_found()
             return self._handle_not_found_by_name(name)
 
         editable_playlists = [
@@ -257,31 +257,31 @@ class TargetPlaylistSelector:
             if self.playlist_manager.can_add_tracks(playlist)
         ]
         if not editable_playlists:
-            self.user_interface.show_no_permission()
+            self.ui.show_no_permission()
             return True
 
         if len(editable_playlists) == 1:
             return editable_playlists[0]
 
-        return self.user_interface.choose_playlist(editable_playlists)
+        return self.ui.choose_playlist(editable_playlists)
 
     def _handle_not_found_by_name(self, name: str) -> dict | bool | None:
         """Обработать отсутствие плейлиста при поиске по имени."""
-        if self.user_interface.ask_enter_another_playlist():
+        if self.ui.ask_enter_another_playlist():
             return True
 
-        if self.user_interface.ask_create_playlist(name):
+        if self.ui.ask_create_playlist(name):
             return self.playlist_manager.create(name)
 
         return None
 
     def _handle_not_found_by_url(self) -> dict | bool | None:
         """Обработать отсутствие плейлиста при поиске по URL/URI."""
-        if self.user_interface.ask_enter_another_playlist():
+        if self.ui.ask_enter_another_playlist():
             return True
 
-        if self.user_interface.ask_create_playlist():
-            new_playlist_name = self.user_interface.ask_new_playlist_name()
+        if self.ui.ask_create_playlist():
+            new_playlist_name = self.ui.ask_new_playlist_name()
             return self.playlist_manager.create(new_playlist_name)
 
         return None

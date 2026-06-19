@@ -1,6 +1,6 @@
 from actions import UserAction
 from auth import Authenticator
-from user_interface import UserInterface
+from ui import UserInterface
 from workflow_factory import WorkflowFactory
 
 
