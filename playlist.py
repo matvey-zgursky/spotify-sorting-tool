@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 
-import spotipy
+from api.client import SpotifyClient
 
 if TYPE_CHECKING:
     from ui import UserInterface
@@ -28,7 +28,7 @@ class PlaylistTrackAdder:
 
     def __init__(
         self,
-        spotify: spotipy.Spotify,
+        spotify: SpotifyClient,
         add_limit: int = ADD_ITEMS_LIMIT,
         read_limit: int = PLAYLIST_ITEMS_LIMIT,
     ) -> None:
@@ -115,7 +115,7 @@ class PlaylistManager:
 
     def __init__(
         self,
-        spotify: spotipy.Spotify,
+        spotify: SpotifyClient,
         current_user_id: str,
         page_limit: int = PLAYLIST_PAGE_LIMIT,
     ) -> None:

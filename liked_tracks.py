@@ -1,4 +1,4 @@
-import spotipy
+from api.client import SpotifyClient
 
 SAVED_TRACKS_PAGE_LIMIT = 50
 
@@ -8,7 +8,7 @@ class LikedTracks:
 
     def __init__(
         self,
-        spotify: spotipy.Spotify,
+        spotify: SpotifyClient,
         page_limit: int = SAVED_TRACKS_PAGE_LIMIT,
     ) -> None:
         self.spotify = spotify

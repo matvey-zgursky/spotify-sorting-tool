@@ -3,6 +3,8 @@ import os
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
+from api.client import SpotifyClient
+
 
 class Authenticator:
     """Настраивает OAuth и создает клиент Spotify."""
@@ -32,7 +34,7 @@ class Authenticator:
                 "Missing Spotify settings in .env: " + ", ".join(missing_vars)
             )
 
-    def create_client(self) -> spotipy.Spotify:
+    def create_client(self) -> SpotifyClient:
         """Создать авторизованный клиент Spotify API."""
         self.validate_settings()
         auth_manager = SpotifyOAuth(
@@ -40,4 +42,4 @@ class Authenticator:
             cache_path=self.TOKEN_CACHE_PATH,
             open_browser=False,
         )
-        return spotipy.Spotify(auth_manager=auth_manager)
+        return SpotifyClient(spotipy.Spotify(auth_manager=auth_manager))

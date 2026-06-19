@@ -1,10 +1,9 @@
 from typing import Protocol
 
-import spotipy
-
 from actions import UserAction
 from liked_tracks import LikedTracks
 from playlist import PlaylistManager, PlaylistTrackAdder, TargetPlaylistSelector
+from api.client import SpotifyClient
 from transfer import TransferLikedTracksWorkflow
 from ui import UserInterface
 
@@ -21,7 +20,7 @@ class WorkflowFactory:
 
     def __init__(
         self,
-        spotify: spotipy.Spotify,
+        spotify: SpotifyClient,
         user: dict,
         ui: UserInterface,
     ) -> None:
