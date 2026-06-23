@@ -2,12 +2,14 @@ from dotenv import load_dotenv
 
 from app import App
 from api.errors import SpotifyAppError
+from logging_config import configure_logging
 
 
 def main() -> None:
     """Запустить менеджер любимых треков Spotify."""
     try:
         load_dotenv()
+        configure_logging()
         app = App.create()
         app.run()
     except SpotifyAppError as error:
