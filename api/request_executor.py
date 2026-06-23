@@ -1,4 +1,5 @@
 from collections.abc import Callable
+import logging
 from time import sleep
 from typing import Any, TypeVar
 
@@ -20,6 +21,8 @@ DEFAULT_RETRY_AFTER_SECONDS = 1
 
 T = TypeVar("T")
 
+logger = logging.getLogger(__name__)
+
 
 def call_spotify(
     operation: Callable[..., T],
@@ -27,21 +30,43 @@ def call_spotify(
     **kwargs: Any,
 ) -> T:
     """Выполнить Spotify API-вызов с повторами и понятными ошибками."""
+    operation_name = _get_operation_name(operation)
+
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            return operation(*args, **kwargs)
+            result = operation(*args, **kwargs)
+            logger.debug(
+                "Spotify API request succeeded: operation=%s",
+                operation_name,
+            )
+            return result
         except SpotifyException as error:
             if _should_retry_spotify_error(error, attempt):
                 sleep(_get_retry_delay(error, attempt))
             else:
+                logger.error(
+                    "Spotify API request failed: operation=%s status=%s",
+                    operation_name,
+                    getattr(error, "http_status", None),
+                )
                 raise _map_spotify_error(error) from error
         except requests.exceptions.RequestException as error:
             if attempt < MAX_RETRIES:
                 sleep(_get_backoff_delay(attempt))
             else:
+                logger.error(
+                    "Spotify API network request failed: operation=%s error=%s",
+                    operation_name,
+                    error.__class__.__name__,
+                )
                 raise SpotifyNetworkError() from error
 
     raise SpotifyServerError()
+
+
+def _get_operation_name(operation: Callable[..., Any]) -> str:
+    """Вернуть безопасное имя операции без аргументов вызова."""
+    return getattr(operation, "__name__", operation.__class__.__name__)
 
 
 def _should_retry_spotify_error(error: SpotifyException, attempt: int) -> bool:

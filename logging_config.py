@@ -6,6 +6,10 @@ DEFAULT_LOG_LEVEL = "INFO"
 DEFAULT_LOG_FILE = "logs/app.log"
 LOG_FORMAT = "%(asctime)s %(levelname)s [%(name)s] %(message)s"
 PROJECT_ROOT = Path(__file__).resolve().parent
+THIRD_PARTY_LOG_LEVELS = {
+    "spotipy": logging.WARNING,
+    "urllib3": logging.WARNING,
+}
 
 
 def configure_logging() -> None:
@@ -22,6 +26,13 @@ def configure_logging() -> None:
             logging.FileHandler(log_file, encoding="utf-8"),
         ],
     )
+    _configure_third_party_logging()
+
+
+def _configure_third_party_logging() -> None:
+    """Приглушить подробные логи библиотек."""
+    for logger_name, log_level in THIRD_PARTY_LOG_LEVELS.items():
+        logging.getLogger(logger_name).setLevel(log_level)
 
 
 def _get_log_file_path() -> Path:
