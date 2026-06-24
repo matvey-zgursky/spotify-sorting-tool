@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import logging
 from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 
@@ -12,6 +13,8 @@ if TYPE_CHECKING:
 PLAYLIST_PAGE_LIMIT = 50
 ADD_ITEMS_LIMIT = 100
 PLAYLIST_ITEMS_LIMIT = 100
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -222,8 +225,10 @@ class TargetPlaylistSelector:
             )
 
             if playlist_id:
+                logger.info("Target playlist input received: input_type=id")
                 result = self._handle_playlist_id(playlist_id)
             else:
+                logger.info("Target playlist input received: input_type=name")
                 result = self._handle_playlist_name(playlist_name_or_url)
 
             if result is True:
@@ -235,18 +240,33 @@ class TargetPlaylistSelector:
         """Обработать выбор плейлиста по id."""
         playlist = self.playlist_manager.find_by_id(playlist_id)
         if playlist is None:
+            logger.info("Target playlist not found by id: playlist_id=%s", playlist_id)
             self.ui.show_playlist_not_found()
             return self._handle_not_found_by_url()
 
         if not self.playlist_manager.can_add_tracks(playlist):
+            logger.info(
+                "Target playlist is not editable: playlist_id=%s playlist_name=%s",
+                playlist.get("id"),
+                playlist.get("name"),
+            )
             self.ui.show_no_permission()
             return True
 
+        logger.info(
+            "Target playlist selected by id: playlist_id=%s playlist_name=%s",
+            playlist.get("id"),
+            playlist.get("name"),
+        )
         return playlist
 
     def _handle_playlist_name(self, name: str) -> dict | bool | None:
         """Обработать выбор плейлиста по имени."""
         matching_playlists = self.playlist_manager.find_by_name(name)
+        logger.info(
+            "Target playlist name search completed: matches_count=%s",
+            len(matching_playlists),
+        )
         if not matching_playlists:
             self.ui.show_playlist_not_found()
             return self._handle_not_found_by_name(name)
@@ -256,32 +276,75 @@ class TargetPlaylistSelector:
             for playlist in matching_playlists
             if self.playlist_manager.can_add_tracks(playlist)
         ]
+        logger.info(
+            "Editable target playlists filtered: matches_count=%s "
+            "editable_count=%s",
+            len(matching_playlists),
+            len(editable_playlists),
+        )
         if not editable_playlists:
+            logger.info("No editable target playlists found by name")
             self.ui.show_no_permission()
             return True
 
         if len(editable_playlists) == 1:
+            playlist = editable_playlists[0]
+            logger.info(
+                "Target playlist selected by name: playlist_id=%s "
+                "playlist_name=%s",
+                playlist.get("id"),
+                playlist.get("name"),
+            )
             return editable_playlists[0]
 
-        return self.ui.choose_playlist(editable_playlists)
+        logger.info(
+            "Multiple editable target playlists found: editable_count=%s",
+            len(editable_playlists),
+        )
+        selected_playlist = self.ui.choose_playlist(editable_playlists)
+        logger.info(
+            "Target playlist selected from multiple matches: playlist_id=%s "
+            "playlist_name=%s",
+            selected_playlist.get("id"),
+            selected_playlist.get("name"),
+        )
+        return selected_playlist
 
     def _handle_not_found_by_name(self, name: str) -> dict | bool | None:
         """Обработать отсутствие плейлиста при поиске по имени."""
         if self.ui.ask_enter_another_playlist():
+            logger.info("Target playlist selection retry requested: source=name")
             return True
 
         if self.ui.ask_create_playlist(name):
-            return self.playlist_manager.create(name)
+            logger.info("Target playlist creation requested: source=name")
+            playlist = self.playlist_manager.create(name)
+            logger.info(
+                "Target playlist created: playlist_id=%s playlist_name=%s",
+                playlist.get("id"),
+                playlist.get("name"),
+            )
+            return playlist
 
+        logger.info("Target playlist selection cancelled: source=name")
         return None
 
     def _handle_not_found_by_url(self) -> dict | bool | None:
         """Обработать отсутствие плейлиста при поиске по URL/URI."""
         if self.ui.ask_enter_another_playlist():
+            logger.info("Target playlist selection retry requested: source=id")
             return True
 
         if self.ui.ask_create_playlist():
+            logger.info("Target playlist creation requested: source=id")
             new_playlist_name = self.ui.ask_new_playlist_name()
-            return self.playlist_manager.create(new_playlist_name)
+            playlist = self.playlist_manager.create(new_playlist_name)
+            logger.info(
+                "Target playlist created: playlist_id=%s playlist_name=%s",
+                playlist.get("id"),
+                playlist.get("name"),
+            )
+            return playlist
 
+        logger.info("Target playlist selection cancelled: source=id")
         return None
