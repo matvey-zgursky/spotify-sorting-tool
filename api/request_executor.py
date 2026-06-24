@@ -42,7 +42,18 @@ def call_spotify(
             return result
         except SpotifyException as error:
             if _should_retry_spotify_error(error, attempt):
-                sleep(_get_retry_delay(error, attempt))
+                retry_delay = _get_retry_delay(error, attempt)
+                logger.warning(
+                    "Spotify API request failed, retrying: "
+                    "operation=%s status=%s attempt=%s max_retries=%s "
+                    "retry_delay=%s",
+                    operation_name,
+                    getattr(error, "http_status", None),
+                    attempt,
+                    MAX_RETRIES,
+                    retry_delay,
+                )
+                sleep(retry_delay)
             else:
                 logger.error(
                     "Spotify API request failed: operation=%s status=%s",
@@ -52,7 +63,18 @@ def call_spotify(
                 raise _map_spotify_error(error) from error
         except requests.exceptions.RequestException as error:
             if attempt < MAX_RETRIES:
-                sleep(_get_backoff_delay(attempt))
+                retry_delay = _get_backoff_delay(attempt)
+                logger.warning(
+                    "Spotify API network request failed, retrying: "
+                    "operation=%s error=%s attempt=%s max_retries=%s "
+                    "retry_delay=%s",
+                    operation_name,
+                    error.__class__.__name__,
+                    attempt,
+                    MAX_RETRIES,
+                    retry_delay,
+                )
+                sleep(retry_delay)
             else:
                 logger.error(
                     "Spotify API network request failed: operation=%s error=%s",
