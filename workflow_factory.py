@@ -1,3 +1,4 @@
+import logging
 from typing import Protocol
 
 from actions import UserAction
@@ -6,6 +7,8 @@ from playlist import PlaylistManager, PlaylistTrackAdder, TargetPlaylistSelector
 from api.client import SpotifyClient
 from transfer import TransferLikedTracksWorkflow
 from ui import UserInterface
+
+logger = logging.getLogger(__name__)
 
 
 class Workflow(Protocol):
@@ -30,6 +33,9 @@ class WorkflowFactory:
 
     def create(self, action: UserAction) -> Workflow:
         """Создать сценарий для выбранного действия."""
+        action_value = action.value
+        logger.debug("Workflow creation requested: action=%s", action_value)
+
         if action == UserAction.TRANSFER_LIKED_TRACKS:
             playlist_manager = PlaylistManager(self.spotify, self.user["id"])
             playlist_selector = TargetPlaylistSelector(
@@ -38,11 +44,18 @@ class WorkflowFactory:
             )
             liked_tracks = LikedTracks(self.spotify)
             track_adder = PlaylistTrackAdder(self.spotify)
-            return TransferLikedTracksWorkflow(
+            workflow = TransferLikedTracksWorkflow(
                 self.ui,
                 playlist_selector,
                 liked_tracks,
                 track_adder,
             )
+            logger.debug(
+                "Workflow created: action=%s workflow=%s",
+                action_value,
+                workflow.__class__.__name__,
+            )
+            return workflow
 
-        raise ValueError(f"Unsupported user action: {action.value}")
+        logger.error("Unsupported workflow action requested: action=%s", action_value)
+        raise ValueError(f"Unsupported user action: {action_value}")
