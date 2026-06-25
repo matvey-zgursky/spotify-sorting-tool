@@ -1,6 +1,10 @@
+import logging
+
 from api.client import SpotifyClient
 
 SAVED_TRACKS_PAGE_LIMIT = 50
+
+logger = logging.getLogger(__name__)
 
 
 class LikedTracks:
@@ -39,6 +43,12 @@ class LikedTracks:
             middle_page = (left_page + right_page) // 2
             page = self._get_saved_tracks_page(middle_page)
             last_year = self._get_last_item_year(page)
+            logger.debug(
+                "Liked tracks start page probe: year=%s page=%s last_year=%s",
+                year,
+                middle_page,
+                last_year,
+            )
 
             if last_year > year:
                 left_page = middle_page + 1
@@ -55,9 +65,19 @@ class LikedTracks:
     ) -> int | None:
         """Вернуть первую страницу, с которой стоит искать треки за указанный год."""
         if total <= self.page_limit:
+            logger.info(
+                "Liked tracks start page selected: year=%s start_page=0",
+                year,
+            )
             return 0
 
-        return self._find_first_page_not_newer_than_year(year, total)
+        start_page = self._find_first_page_not_newer_than_year(year, total)
+        logger.info(
+            "Liked tracks start page selected: year=%s start_page=%s",
+            year,
+            start_page,
+        )
+        return start_page
 
     def _collect_track_uris_starting_from_page(
         self,
@@ -75,14 +95,34 @@ class LikedTracks:
             else:
                 page = self._get_saved_tracks_page(page_index)
 
+            page_matches_count = 0
             for item in page.get("items", []):
                 added_at = item["added_at"]
                 added_year = int(added_at[:4])
 
                 if added_year == year:
                     track_uris.append(item["track"]["uri"])
+                    page_matches_count += 1
                 elif added_year < year:
+                    logger.debug(
+                        "Liked tracks page scan stopped: year=%s page=%s "
+                        "matched_count=%s tracks_count=%s stop_year=%s",
+                        year,
+                        page_index,
+                        page_matches_count,
+                        len(track_uris),
+                        added_year,
+                    )
                     return track_uris
+
+            logger.debug(
+                "Liked tracks page scanned: year=%s page=%s matched_count=%s "
+                "tracks_count=%s",
+                year,
+                page_index,
+                page_matches_count,
+                len(track_uris),
+            )
 
             if not page.get("next"):
                 break
@@ -96,10 +136,13 @@ class LikedTracks:
         year: int,
     ) -> list[str]:
         """Вернуть URI любимых треков, добавленных в указанном году."""
+        logger.info("Liked tracks search started: year=%s", year)
         first_page = self._get_saved_tracks_page(0)
         total = first_page["total"]
+        logger.info("Liked tracks first page loaded: year=%s total=%s", year, total)
 
         if total == 0:
+            logger.info("Liked tracks search stopped: library is empty year=%s", year)
             return []
 
         start_page = self._find_start_page_by_added_year(
@@ -108,10 +151,20 @@ class LikedTracks:
         )
 
         if start_page is None:
+            logger.info(
+                "Liked tracks search stopped: no start page found year=%s",
+                year,
+            )
             return []
 
-        return self._collect_track_uris_starting_from_page(
+        track_uris = self._collect_track_uris_starting_from_page(
             first_page,
             start_page,
             year,
         )
+        logger.info(
+            "Liked tracks search completed: year=%s tracks_count=%s",
+            year,
+            len(track_uris),
+        )
+        return track_uris
