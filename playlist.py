@@ -45,19 +45,38 @@ class PlaylistTrackAdder:
         track_uris: list[str],
     ) -> AddTracksResult:
         """Добавить в плейлист отсутствующие в нем треки."""
+        logger.info(
+            "Playlist track add started: playlist_id=%s tracks_count=%s",
+            playlist_id,
+            len(track_uris),
+        )
         new_track_uris = self._exclude_existing_track_uris(
             playlist_id,
             track_uris,
         )
 
         for chunk in self._split_track_uris_chunks(new_track_uris):
+            logger.info(
+                "Playlist track batch add started: playlist_id=%s batch_size=%s",
+                playlist_id,
+                len(chunk),
+            )
             self.spotify.playlist_add_items(playlist_id, chunk)
 
-        return AddTracksResult(
+        result = AddTracksResult(
             found_count=len(track_uris),
             added_count=len(new_track_uris),
             skipped_count=len(track_uris) - len(new_track_uris),
         )
+        logger.info(
+            "Playlist track add completed: playlist_id=%s found_count=%s "
+            "added_count=%s skipped_count=%s",
+            playlist_id,
+            result.found_count,
+            result.added_count,
+            result.skipped_count,
+        )
+        return result
 
     def _exclude_existing_track_uris(
         self,
@@ -65,6 +84,12 @@ class PlaylistTrackAdder:
         track_uris: list[str],
     ) -> list[str]:
         """Вернуть URI треков, которых еще нет в плейлисте."""
+        logger.info(
+            "Playlist track deduplication started: playlist_id=%s "
+            "tracks_count=%s",
+            playlist_id,
+            len(track_uris),
+        )
         known_track_uris = self._get_playlist_track_uris(playlist_id)
         new_track_uris = []
 
@@ -73,6 +98,13 @@ class PlaylistTrackAdder:
                 new_track_uris.append(track_uri)
                 known_track_uris.add(track_uri)
 
+        logger.info(
+            "Playlist track deduplication completed: playlist_id=%s "
+            "new_count=%s skipped_count=%s",
+            playlist_id,
+            len(new_track_uris),
+            len(track_uris) - len(new_track_uris),
+        )
         return new_track_uris
 
     def _get_playlist_track_uris(self, playlist_id: str) -> set[str]:
@@ -100,6 +132,11 @@ class PlaylistTrackAdder:
 
             offset += self.read_limit
 
+        logger.info(
+            "Existing playlist tracks loaded: playlist_id=%s existing_count=%s",
+            playlist_id,
+            len(track_uris),
+        )
         return track_uris
 
     def _split_track_uris_chunks(
