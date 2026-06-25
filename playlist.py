@@ -173,13 +173,21 @@ class PlaylistManager:
                 limit=self.page_limit,
                 offset=offset,
             )
-            playlists.extend(page.get("items", []))
+            items = page.get("items", [])
+            playlists.extend(items)
+            logger.debug(
+                "User playlists page loaded: offset=%s limit=%s items_count=%s",
+                offset,
+                self.page_limit,
+                len(items),
+            )
 
             if not page.get("next"):
                 break
 
             offset += self.page_limit
 
+        logger.debug("User playlists loaded: playlists_count=%s", len(playlists))
         return playlists
 
     def find_by_id(self, playlist_id: str) -> dict | None:
@@ -201,7 +209,15 @@ class PlaylistManager:
     def can_add_tracks(self, playlist: dict) -> bool:
         """Проверить, может ли текущий пользователь добавлять треки."""
         owner = playlist.get("owner") or {}
-        return owner.get("id") == self.current_user_id
+        can_add = owner.get("id") == self.current_user_id
+        logger.debug(
+            "Playlist edit permission checked: playlist_id=%s playlist_name=%s "
+            "can_add=%s",
+            playlist.get("id"),
+            playlist.get("name"),
+            can_add,
+        )
+        return can_add
 
     def create(self, name: str) -> dict:
         """Создать новый публичный плейлист."""
