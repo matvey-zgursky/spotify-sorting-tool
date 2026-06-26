@@ -1,4 +1,5 @@
 from collections.abc import Mapping
+import logging
 from typing import Any
 
 from api.errors import SpotifyResponseError
@@ -13,6 +14,8 @@ from api.types import (
     SpotifyTrack,
     SpotifyUser,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def parse_user(raw: Any) -> SpotifyUser:
@@ -99,17 +102,21 @@ def _parse_track(raw: Any, context: str) -> SpotifyTrack:
 def _parse_playlist_item(raw: Any) -> SpotifyPlaylistItem:
     """Нормализовать элемент плейлиста, мягко пропуская невалидный трек."""
     if not isinstance(raw, Mapping):
+        logger.debug("Playlist item skipped: item is not a mapping")
         return {"item": None}
 
     track = raw.get("item")
     if track is None:
+        logger.debug("Playlist item skipped: track is missing")
         return {"item": None}
 
     if not isinstance(track, Mapping):
+        logger.debug("Playlist item skipped: track is not a mapping")
         return {"item": None}
 
     track_uri = track.get("uri")
     if not isinstance(track_uri, str) or not track_uri:
+        logger.debug("Playlist item skipped: track URI is missing")
         return {"item": None}
 
     return {"item": {"uri": track_uri}}
@@ -119,13 +126,58 @@ def _parse_playlists_page_items(raw_items: list[Any]) -> list[SpotifyPlaylist]:
     """Нормализовать список плейлистов, пропуская невалидные элементы."""
     playlists = []
 
-    for item in raw_items:
+    for index, item in enumerate(raw_items):
         try:
             playlists.append(parse_playlist(item))
-        except SpotifyResponseError:
+        except SpotifyResponseError as error:
+            print(
+                "Invalid playlist skipped:",
+                f"index={index}",
+                f"id={_get_raw_field(item, 'id')!r}",
+                f"name={_get_raw_field(item, 'name')!r}",
+                f"url={_get_raw_spotify_url(item)!r}",
+                f"error={error}",
+            )
+            logger.warning(
+                "Invalid playlist skipped in playlists page: index=%s "
+                "playlist_id=%s playlist_name=%s playlist_url=%s error=%s",
+                index,
+                _get_raw_field(item, "id"),
+                _get_raw_field(item, "name"),
+                _get_raw_spotify_url(item),
+                error,
+            )
             continue
 
     return playlists
+
+
+def _get_raw_field(raw: Any, key: str) -> str | None:
+    """Вернуть строковое поле из сырого объекта для диагностики."""
+    if not isinstance(raw, Mapping):
+        return None
+
+    value = raw.get(key)
+    if isinstance(value, str):
+        return value
+
+    return None
+
+
+def _get_raw_spotify_url(raw: Any) -> str | None:
+    """Вернуть Spotify URL из сырого объекта для диагностики."""
+    if not isinstance(raw, Mapping):
+        return None
+
+    external_urls = raw.get("external_urls")
+    if not isinstance(external_urls, Mapping):
+        return None
+
+    spotify_url = external_urls.get("spotify")
+    if isinstance(spotify_url, str):
+        return spotify_url
+
+    return None
 
 
 def _parse_owner_id(raw: Any) -> str | None:
