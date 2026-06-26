@@ -62,8 +62,8 @@ class TransferLikedTracksWorkflow:
         self.ui.show_selected_playlist(target_playlist)
         logger.info(
             "Target playlist selected: playlist_id=%s playlist_name=%s",
-            target_playlist.get("id"),
-            target_playlist.get("name"),
+            target_playlist["id"],
+            target_playlist["name"],
         )
         return target_playlist
 
@@ -110,8 +110,8 @@ class TransferLikedTracksWorkflow:
         logger.info(
             "Tracks transfer started: playlist_id=%s playlist_name=%s "
             "tracks_count=%s",
-            playlist.get("id"),
-            playlist.get("name"),
+            playlist["id"],
+            playlist["name"],
             len(track_uris),
         )
         result = self.track_adder.add_tracks(playlist["id"], track_uris)
@@ -119,8 +119,8 @@ class TransferLikedTracksWorkflow:
         logger.info(
             "Tracks transfer completed: playlist_id=%s playlist_name=%s "
             "found_count=%s added_count=%s skipped_count=%s",
-            playlist.get("id"),
-            playlist.get("name"),
+            playlist["id"],
+            playlist["name"],
             result.found_count,
             result.added_count,
             result.skipped_count,

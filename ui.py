@@ -16,7 +16,7 @@ class UserInterface:
 
     def show_authorized_user(self, user: SpotifyUser) -> None:
         """Показать текущего авторизованного пользователя."""
-        display_name = user.get("display_name") or user.get("id")
+        display_name = user["display_name"] or user["id"]
         print(f"Authorized in Spotify as: {display_name}")
 
     def ask_playlist_name_or_url(self) -> str:
@@ -147,13 +147,8 @@ class UserInterface:
 
     def _format_playlist(self, playlist: SpotifyPlaylist) -> str:
         """Вернуть строку с названием и URL плейлиста."""
-        return f"{playlist.get('name')} ({self._get_playlist_url(playlist)})"
+        return f"{playlist['name']} ({self._get_playlist_url(playlist)})"
 
     def _get_playlist_url(self, playlist: SpotifyPlaylist) -> str:
         """Вернуть URL плейлиста Spotify или запасное значение, при отсутствии."""
-        external_urls = playlist.get("external_urls") or {}
-        spotify_url = external_urls.get("spotify")
-        if spotify_url:
-            return spotify_url
-
-        return "unknown URL"
+        return playlist["spotify_url"] or "unknown URL"

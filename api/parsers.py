@@ -64,10 +64,9 @@ def parse_playlists_page(raw: Any) -> SpotifyPlaylistsPage:
     """Проверить и нормализовать страницу плейлистов пользователя."""
     page = _require_mapping(raw, "playlists page")
     return {
-        "items": [
-            parse_playlist(item)
-            for item in _require_list(page, "items", "playlists page")
-        ],
+        "items": _parse_playlists_page_items(
+            _require_list(page, "items", "playlists page"),
+        ),
         "next": _optional_next(page),
     }
 
@@ -114,6 +113,19 @@ def _parse_playlist_item(raw: Any) -> SpotifyPlaylistItem:
         return {"item": None}
 
     return {"item": {"uri": track_uri}}
+
+
+def _parse_playlists_page_items(raw_items: list[Any]) -> list[SpotifyPlaylist]:
+    """Нормализовать список плейлистов, пропуская невалидные элементы."""
+    playlists = []
+
+    for item in raw_items:
+        try:
+            playlists.append(parse_playlist(item))
+        except SpotifyResponseError:
+            continue
+
+    return playlists
 
 
 def _parse_owner_id(raw: Any) -> str | None:
