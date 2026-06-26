@@ -7,7 +7,6 @@ import requests
 from spotipy.exceptions import SpotifyException
 
 from api.errors import (
-    SpotifyAppError,
     SpotifyAuthorizationError,
     SpotifyNetworkError,
     SpotifyPermissionError,
@@ -15,6 +14,7 @@ from api.errors import (
     SpotifyResourceNotFoundError,
     SpotifyServerError,
 )
+from errors import SpotifyAppError
 
 MAX_RETRIES = 3
 DEFAULT_RETRY_AFTER_SECONDS = 1
