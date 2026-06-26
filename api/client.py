@@ -1,5 +1,13 @@
 import spotipy
 
+from api.parsers import (
+    parse_playlist,
+    parse_playlist_items_page,
+    parse_playlists_page,
+    parse_saved_tracks_page,
+    parse_snapshot_response,
+    parse_user,
+)
 from api.request_executor import call_spotify
 from api.types import (
     SpotifyPlaylist,
@@ -19,7 +27,8 @@ class SpotifyClient:
 
     def current_user(self) -> SpotifyUser:
         """Вернуть текущего пользователя Spotify."""
-        return call_spotify(self.spotify.current_user)
+        raw_user = call_spotify(self.spotify.current_user)
+        return parse_user(raw_user)
 
     def current_user_saved_tracks(
         self,
@@ -27,11 +36,12 @@ class SpotifyClient:
         offset: int,
     ) -> SpotifySavedTracksPage:
         """Вернуть страницу любимых треков текущего пользователя."""
-        return call_spotify(
+        raw_page = call_spotify(
             self.spotify.current_user_saved_tracks,
             limit=limit,
             offset=offset,
         )
+        return parse_saved_tracks_page(raw_page)
 
     def playlist_add_items(
         self,
@@ -39,11 +49,12 @@ class SpotifyClient:
         items: list[str],
     ) -> SpotifySnapshotResponse:
         """Добавить треки в плейлист."""
-        return call_spotify(
+        raw_response = call_spotify(
             self.spotify.playlist_add_items,
             playlist_id=playlist_id,
             items=items,
         )
+        return parse_snapshot_response(raw_response)
 
     def playlist_items(
         self,
@@ -52,12 +63,13 @@ class SpotifyClient:
         offset: int,
     ) -> SpotifyPlaylistItemsPage:
         """Вернуть страницу треков плейлиста."""
-        return call_spotify(
+        raw_page = call_spotify(
             self.spotify.playlist_items,
             playlist_id=playlist_id,
             limit=limit,
             offset=offset,
         )
+        return parse_playlist_items_page(raw_page)
 
     def current_user_playlists(
         self,
@@ -65,11 +77,12 @@ class SpotifyClient:
         offset: int,
     ) -> SpotifyPlaylistsPage:
         """Вернуть страницу плейлистов текущего пользователя."""
-        return call_spotify(
+        raw_page = call_spotify(
             self.spotify.current_user_playlists,
             limit=limit,
             offset=offset,
         )
+        return parse_playlists_page(raw_page)
 
     def current_user_playlist_create(
         self,
@@ -77,8 +90,9 @@ class SpotifyClient:
         public: bool,
     ) -> SpotifyPlaylist:
         """Создать плейлист для текущего пользователя."""
-        return call_spotify(
+        raw_playlist = call_spotify(
             self.spotify.current_user_playlist_create,
             name=name,
             public=public,
         )
+        return parse_playlist(raw_playlist)

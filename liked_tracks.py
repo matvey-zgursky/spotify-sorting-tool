@@ -97,7 +97,7 @@ class LikedTracks:
                 page = self._get_saved_tracks_page(page_index)
 
             page_matches_count = 0
-            for item in page.get("items", []):
+            for item in page["items"]:
                 added_at = item["added_at"]
                 added_year = int(added_at[:4])
 
@@ -125,7 +125,7 @@ class LikedTracks:
                 len(track_uris),
             )
 
-            if not page.get("next"):
+            if not page["next"]:
                 break
 
             page_index += 1

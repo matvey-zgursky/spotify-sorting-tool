@@ -130,15 +130,14 @@ class PlaylistTrackAdder:
                 offset=offset,
             )
 
-            items = page.get("items", [])
+            items = page["items"]
 
             for item in items:
-                track = item.get("item") or {}
-                track_uri = track.get("uri")
-                if track_uri:
-                    track_uris.add(track_uri)
+                track = item["item"]
+                if track is not None:
+                    track_uris.add(track["uri"])
 
-            if not page.get("next"):
+            if not page["next"]:
                 break
 
             offset += self.read_limit
@@ -184,7 +183,7 @@ class PlaylistManager:
                 limit=self.page_limit,
                 offset=offset,
             )
-            items = page.get("items", [])
+            items = page["items"]
             playlists.extend(items)
             logger.debug(
                 "User playlists page loaded: offset=%s limit=%s items_count=%s",
@@ -193,7 +192,7 @@ class PlaylistManager:
                 len(items),
             )
 
-            if not page.get("next"):
+            if not page["next"]:
                 break
 
             offset += self.page_limit
@@ -204,7 +203,7 @@ class PlaylistManager:
     def find_by_id(self, playlist_id: str) -> SpotifyPlaylist | None:
         """Найти плейлист в медиатеке пользователя по id."""
         for playlist in self.get_user_playlists():
-            if playlist.get("id") == playlist_id:
+            if playlist["id"] == playlist_id:
                 return playlist
 
         return None
@@ -214,18 +213,17 @@ class PlaylistManager:
         return [
             playlist
             for playlist in self.get_user_playlists()
-            if playlist.get("name") == name
+            if playlist["name"] == name
         ]
 
     def can_add_tracks(self, playlist: SpotifyPlaylist) -> bool:
         """Проверить, может ли текущий пользователь добавлять треки."""
-        owner = playlist.get("owner") or {}
-        can_add = owner.get("id") == self.current_user_id
+        can_add = playlist["owner_id"] == self.current_user_id
         logger.debug(
             "Playlist edit permission checked: playlist_id=%s playlist_name=%s "
             "can_add=%s",
-            playlist.get("id"),
-            playlist.get("name"),
+            playlist["id"],
+            playlist["name"],
             can_add,
         )
         return can_add
@@ -314,16 +312,16 @@ class TargetPlaylistSelector:
         if not self.playlist_manager.can_add_tracks(playlist):
             logger.info(
                 "Target playlist is not editable: playlist_id=%s playlist_name=%s",
-                playlist.get("id"),
-                playlist.get("name"),
+                playlist["id"],
+                playlist["name"],
             )
             self.ui.show_no_permission()
             return PlaylistSelectionSignal.RETRY
 
         logger.info(
             "Target playlist selected by id: playlist_id=%s playlist_name=%s",
-            playlist.get("id"),
-            playlist.get("name"),
+            playlist["id"],
+            playlist["name"],
         )
         return playlist
 
@@ -362,8 +360,8 @@ class TargetPlaylistSelector:
             logger.info(
                 "Target playlist selected by name: playlist_id=%s "
                 "playlist_name=%s",
-                playlist.get("id"),
-                playlist.get("name"),
+                playlist["id"],
+                playlist["name"],
             )
             return editable_playlists[0]
 
@@ -375,8 +373,8 @@ class TargetPlaylistSelector:
         logger.info(
             "Target playlist selected from multiple matches: playlist_id=%s "
             "playlist_name=%s",
-            selected_playlist.get("id"),
-            selected_playlist.get("name"),
+            selected_playlist["id"],
+            selected_playlist["name"],
         )
         return selected_playlist
 
@@ -394,8 +392,8 @@ class TargetPlaylistSelector:
             playlist = self.playlist_manager.create(name)
             logger.info(
                 "Target playlist created: playlist_id=%s playlist_name=%s",
-                playlist.get("id"),
-                playlist.get("name"),
+                playlist["id"],
+                playlist["name"],
             )
             return playlist
 
@@ -416,8 +414,8 @@ class TargetPlaylistSelector:
             playlist = self.playlist_manager.create(new_playlist_name)
             logger.info(
                 "Target playlist created: playlist_id=%s playlist_name=%s",
-                playlist.get("id"),
-                playlist.get("name"),
+                playlist["id"],
+                playlist["name"],
             )
             return playlist
 

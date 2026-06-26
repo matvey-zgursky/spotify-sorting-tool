@@ -56,3 +56,10 @@ class SpotifyNetworkError(SpotifyAppError):
         super().__init__(
             "Could not reach Spotify. Check your internet connection " "and try again."
         )
+
+
+class SpotifyResponseError(SpotifyAppError):
+    """Spotify вернул ответ неожиданной формы."""
+
+    def __init__(self, details: str) -> None:
+        super().__init__(f"Spotify returned an unexpected response: {details}")
