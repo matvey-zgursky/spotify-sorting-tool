@@ -1,6 +1,7 @@
 import logging
 
 from api.client import SpotifyClient
+from api.types import SpotifySavedTracksPage
 
 SAVED_TRACKS_PAGE_LIMIT = 50
 
@@ -18,14 +19,14 @@ class LikedTracks:
         self.spotify = spotify
         self.page_limit = page_limit
 
-    def _get_saved_tracks_page(self, page_index: int) -> dict:
+    def _get_saved_tracks_page(self, page_index: int) -> SpotifySavedTracksPage:
         """Вернуть страницу любимых треков по ее номеру."""
         return self.spotify.current_user_saved_tracks(
             limit=self.page_limit,
             offset=page_index * self.page_limit,
         )
 
-    def _get_last_item_year(self, page: dict) -> int:
+    def _get_last_item_year(self, page: SpotifySavedTracksPage) -> int:
         """Вернуть год добавления последнего трека на странице."""
         return int(page["items"][-1]["added_at"][:4])
 
@@ -81,12 +82,12 @@ class LikedTracks:
 
     def _collect_track_uris_starting_from_page(
         self,
-        first_page: dict,
+        first_page: SpotifySavedTracksPage,
         start_page: int,
         year: int,
     ) -> list[str]:
         """Собрать URI любимых треков за год, начиная с указанной страницы."""
-        track_uris = []
+        track_uris: list[str] = []
         page_index = start_page
 
         while True:

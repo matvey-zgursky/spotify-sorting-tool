@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import Enum
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal, TypeAlias
 from urllib.parse import urlparse
 
 from api.client import SpotifyClient
+from api.types import SpotifyPlaylist
 
 if TYPE_CHECKING:
     from ui import UserInterface
@@ -24,6 +26,15 @@ class AddTracksResult:
     found_count: int
     added_count: int
     skipped_count: int
+
+
+class PlaylistSelectionSignal(Enum):
+    """Служебные сигналы выбора целевого плейлиста."""
+
+    RETRY = "retry"
+
+
+PlaylistSelectionRetry: TypeAlias = Literal[PlaylistSelectionSignal.RETRY]
 
 
 class PlaylistTrackAdder:
@@ -91,7 +102,7 @@ class PlaylistTrackAdder:
             len(track_uris),
         )
         known_track_uris = self._get_playlist_track_uris(playlist_id)
-        new_track_uris = []
+        new_track_uris: list[str] = []
 
         for track_uri in track_uris:
             if track_uri not in known_track_uris:
@@ -109,7 +120,7 @@ class PlaylistTrackAdder:
 
     def _get_playlist_track_uris(self, playlist_id: str) -> set[str]:
         """Вернуть URI всех треков плейлиста."""
-        track_uris = set()
+        track_uris: set[str] = set()
         offset = 0
 
         while True:
@@ -163,9 +174,9 @@ class PlaylistManager:
         self.current_user_id = current_user_id
         self.page_limit = page_limit
 
-    def get_user_playlists(self) -> list[dict]:
+    def get_user_playlists(self) -> list[SpotifyPlaylist]:
         """Вернуть все плейлисты из медиатеки текущего пользователя."""
-        playlists = []
+        playlists: list[SpotifyPlaylist] = []
         offset = 0
 
         while True:
@@ -190,7 +201,7 @@ class PlaylistManager:
         logger.debug("User playlists loaded: playlists_count=%s", len(playlists))
         return playlists
 
-    def find_by_id(self, playlist_id: str) -> dict | None:
+    def find_by_id(self, playlist_id: str) -> SpotifyPlaylist | None:
         """Найти плейлист в медиатеке пользователя по id."""
         for playlist in self.get_user_playlists():
             if playlist.get("id") == playlist_id:
@@ -198,7 +209,7 @@ class PlaylistManager:
 
         return None
 
-    def find_by_name(self, name: str) -> list[dict]:
+    def find_by_name(self, name: str) -> list[SpotifyPlaylist]:
         """Найти плейлисты в медиатеке пользователя по точному названию."""
         return [
             playlist
@@ -206,7 +217,7 @@ class PlaylistManager:
             if playlist.get("name") == name
         ]
 
-    def can_add_tracks(self, playlist: dict) -> bool:
+    def can_add_tracks(self, playlist: SpotifyPlaylist) -> bool:
         """Проверить, может ли текущий пользователь добавлять треки."""
         owner = playlist.get("owner") or {}
         can_add = owner.get("id") == self.current_user_id
@@ -219,7 +230,7 @@ class PlaylistManager:
         )
         return can_add
 
-    def create(self, name: str) -> dict:
+    def create(self, name: str) -> SpotifyPlaylist:
         """Создать новый публичный плейлист."""
         return self.spotify.current_user_playlist_create(
             name=name,
@@ -269,7 +280,7 @@ class TargetPlaylistSelector:
         self.playlist_manager = playlist_manager
         self.ui = ui
 
-    def select(self) -> dict | None:
+    def select(self) -> SpotifyPlaylist | None:
         """Запросить и вернуть плейлист или None при отказе."""
         while True:
             playlist_name_or_url = self.ui.ask_playlist_name_or_url()
@@ -284,12 +295,15 @@ class TargetPlaylistSelector:
                 logger.info("Target playlist input received: input_type=name")
                 result = self._handle_playlist_name(playlist_name_or_url)
 
-            if result is True:
+            if result == PlaylistSelectionSignal.RETRY:
                 continue
 
             return result
 
-    def _handle_playlist_id(self, playlist_id: str) -> dict | bool | None:
+    def _handle_playlist_id(
+        self,
+        playlist_id: str,
+    ) -> SpotifyPlaylist | PlaylistSelectionRetry | None:
         """Обработать выбор плейлиста по id."""
         playlist = self.playlist_manager.find_by_id(playlist_id)
         if playlist is None:
@@ -304,7 +318,7 @@ class TargetPlaylistSelector:
                 playlist.get("name"),
             )
             self.ui.show_no_permission()
-            return True
+            return PlaylistSelectionSignal.RETRY
 
         logger.info(
             "Target playlist selected by id: playlist_id=%s playlist_name=%s",
@@ -313,7 +327,10 @@ class TargetPlaylistSelector:
         )
         return playlist
 
-    def _handle_playlist_name(self, name: str) -> dict | bool | None:
+    def _handle_playlist_name(
+        self,
+        name: str,
+    ) -> SpotifyPlaylist | PlaylistSelectionRetry | None:
         """Обработать выбор плейлиста по имени."""
         matching_playlists = self.playlist_manager.find_by_name(name)
         logger.info(
@@ -338,7 +355,7 @@ class TargetPlaylistSelector:
         if not editable_playlists:
             logger.info("No editable target playlists found by name")
             self.ui.show_no_permission()
-            return True
+            return PlaylistSelectionSignal.RETRY
 
         if len(editable_playlists) == 1:
             playlist = editable_playlists[0]
@@ -363,11 +380,14 @@ class TargetPlaylistSelector:
         )
         return selected_playlist
 
-    def _handle_not_found_by_name(self, name: str) -> dict | bool | None:
+    def _handle_not_found_by_name(
+        self,
+        name: str,
+    ) -> SpotifyPlaylist | PlaylistSelectionRetry | None:
         """Обработать отсутствие плейлиста при поиске по имени."""
         if self.ui.ask_enter_another_playlist():
             logger.info("Target playlist selection retry requested: source=name")
-            return True
+            return PlaylistSelectionSignal.RETRY
 
         if self.ui.ask_create_playlist(name):
             logger.info("Target playlist creation requested: source=name")
@@ -382,11 +402,13 @@ class TargetPlaylistSelector:
         logger.info("Target playlist selection cancelled: source=name")
         return None
 
-    def _handle_not_found_by_url(self) -> dict | bool | None:
+    def _handle_not_found_by_url(
+        self,
+    ) -> SpotifyPlaylist | PlaylistSelectionRetry | None:
         """Обработать отсутствие плейлиста при поиске по URL/URI."""
         if self.ui.ask_enter_another_playlist():
             logger.info("Target playlist selection retry requested: source=id")
-            return True
+            return PlaylistSelectionSignal.RETRY
 
         if self.ui.ask_create_playlist():
             logger.info("Target playlist creation requested: source=id")
