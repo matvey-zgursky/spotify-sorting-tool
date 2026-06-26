@@ -1,23 +1,11 @@
-from typing import NotRequired, TypedDict
+from typing import TypedDict
 
 
 class SpotifyUser(TypedDict):
     """Минимальные данные текущего пользователя Spotify."""
 
     id: str
-    display_name: NotRequired[str | None]
-
-
-class SpotifyPlaylistOwner(TypedDict):
-    """Минимальные данные владельца плейлиста."""
-
-    id: str
-
-
-class SpotifyExternalUrls(TypedDict):
-    """Внешние URL Spotify-ресурса."""
-
-    spotify: NotRequired[str]
+    display_name: str | None
 
 
 class SpotifyPlaylist(TypedDict):
@@ -25,8 +13,8 @@ class SpotifyPlaylist(TypedDict):
 
     id: str
     name: str
-    owner: NotRequired[SpotifyPlaylistOwner]
-    external_urls: NotRequired[SpotifyExternalUrls]
+    owner_id: str | None
+    spotify_url: str | None
 
 
 class SpotifyTrack(TypedDict):
@@ -47,27 +35,27 @@ class SpotifySavedTracksPage(TypedDict):
 
     items: list[SpotifySavedTrackItem]
     total: int
-    next: NotRequired[str | None]
+    next: str | None
 
 
 class SpotifyPlaylistItem(TypedDict):
     """Элемент страницы треков плейлиста."""
 
-    item: NotRequired[SpotifyTrack | None]
+    item: SpotifyTrack | None
 
 
 class SpotifyPlaylistItemsPage(TypedDict):
     """Страница треков плейлиста."""
 
     items: list[SpotifyPlaylistItem]
-    next: NotRequired[str | None]
+    next: str | None
 
 
 class SpotifyPlaylistsPage(TypedDict):
     """Страница плейлистов пользователя."""
 
     items: list[SpotifyPlaylist]
-    next: NotRequired[str | None]
+    next: str | None
 
 
 class SpotifySnapshotResponse(TypedDict):
