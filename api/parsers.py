@@ -130,54 +130,14 @@ def _parse_playlists_page_items(raw_items: list[Any]) -> list[SpotifyPlaylist]:
         try:
             playlists.append(parse_playlist(item))
         except SpotifyResponseError as error:
-            print(
-                "Invalid playlist skipped:",
-                f"index={index}",
-                f"id={_get_raw_field(item, 'id')!r}",
-                f"name={_get_raw_field(item, 'name')!r}",
-                f"url={_get_raw_spotify_url(item)!r}",
-                f"error={error}",
-            )
             logger.warning(
-                "Invalid playlist skipped in playlists page: index=%s "
-                "playlist_id=%s playlist_name=%s playlist_url=%s error=%s",
+                "Invalid playlist skipped in playlists page: index=%s error=%s",
                 index,
-                _get_raw_field(item, "id"),
-                _get_raw_field(item, "name"),
-                _get_raw_spotify_url(item),
                 error,
             )
             continue
 
     return playlists
-
-
-def _get_raw_field(raw: Any, key: str) -> str | None:
-    """Вернуть строковое поле из сырого объекта для диагностики."""
-    if not isinstance(raw, Mapping):
-        return None
-
-    value = raw.get(key)
-    if isinstance(value, str):
-        return value
-
-    return None
-
-
-def _get_raw_spotify_url(raw: Any) -> str | None:
-    """Вернуть Spotify URL из сырого объекта для диагностики."""
-    if not isinstance(raw, Mapping):
-        return None
-
-    external_urls = raw.get("external_urls")
-    if not isinstance(external_urls, Mapping):
-        return None
-
-    spotify_url = external_urls.get("spotify")
-    if isinstance(spotify_url, str):
-        return spotify_url
-
-    return None
 
 
 def _parse_owner_id(raw: Any) -> str | None:
