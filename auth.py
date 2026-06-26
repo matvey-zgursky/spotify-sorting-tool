@@ -5,7 +5,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
 from api.client import SpotifyClient
-from api.errors import SpotifySettingsError
+from errors import SpotifySettingsError
 
 logger = logging.getLogger(__name__)
 
