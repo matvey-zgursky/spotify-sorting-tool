@@ -2,6 +2,7 @@ import logging
 from typing import Protocol
 
 from actions import UserAction
+from api.types import SpotifyUser
 from liked_tracks import LikedTracks
 from playlist import PlaylistManager, PlaylistTrackAdder, TargetPlaylistSelector
 from api.client import SpotifyClient
@@ -24,7 +25,7 @@ class WorkflowFactory:
     def __init__(
         self,
         spotify: SpotifyClient,
-        user: dict,
+        user: SpotifyUser,
         ui: UserInterface,
     ) -> None:
         self.spotify = spotify

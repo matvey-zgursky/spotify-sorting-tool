@@ -3,6 +3,8 @@ from __future__ import annotations
 from datetime import date
 from typing import TYPE_CHECKING
 
+from api.types import SpotifyPlaylist, SpotifyUser
+
 if TYPE_CHECKING:
     from playlist import AddTracksResult
 
@@ -12,7 +14,7 @@ MIN_SPOTIFY_YEAR = 2008
 class UserInterface:
     """Отвечает за взаимодействие с пользователем в консоли."""
 
-    def show_authorized_user(self, user: dict) -> None:
+    def show_authorized_user(self, user: SpotifyUser) -> None:
         """Показать текущего авторизованного пользователя."""
         display_name = user.get("display_name") or user.get("id")
         print(f"Authorized in Spotify as: {display_name}")
@@ -76,7 +78,7 @@ class UserInterface:
 
             print("Please answer y or n.")
 
-    def choose_playlist(self, playlists: list[dict]) -> dict:
+    def choose_playlist(self, playlists: list[SpotifyPlaylist]) -> SpotifyPlaylist:
         """Попросить пользователя выбрать плейлист из списка."""
         print("Found several editable playlists with this name:")
         for index, playlist in enumerate(playlists, start=1):
@@ -99,7 +101,7 @@ class UserInterface:
         """Сообщить, что пользователь не может добавлять треки."""
         print("You do not have permission to add tracks to this playlist.")
 
-    def show_selected_playlist(self, playlist: dict) -> None:
+    def show_selected_playlist(self, playlist: SpotifyPlaylist) -> None:
         """Показать выбранный плейлист."""
         print(f"Selected playlist: {self._format_playlist(playlist)}")
 
@@ -131,7 +133,11 @@ class UserInterface:
         """Сообщить, что перенос треков начался."""
         print("Adding tracks to playlist...")
 
-    def show_tracks_added(self, result: AddTracksResult, playlist: dict) -> None:
+    def show_tracks_added(
+        self,
+        result: AddTracksResult,
+        playlist: SpotifyPlaylist,
+    ) -> None:
         """Показать результат добавления треков в плейлист."""
         formatted_playlist = self._format_playlist(playlist)
         print(
@@ -139,11 +145,11 @@ class UserInterface:
             f"Skipped {result.skipped_count} duplicates.",
         )
 
-    def _format_playlist(self, playlist: dict) -> str:
+    def _format_playlist(self, playlist: SpotifyPlaylist) -> str:
         """Вернуть строку с названием и URL плейлиста."""
         return f"{playlist.get('name')} ({self._get_playlist_url(playlist)})"
 
-    def _get_playlist_url(self, playlist: dict) -> str:
+    def _get_playlist_url(self, playlist: SpotifyPlaylist) -> str:
         """Вернуть URL плейлиста Spotify или запасное значение, при отсутствии."""
         external_urls = playlist.get("external_urls") or {}
         spotify_url = external_urls.get("spotify")

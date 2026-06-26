@@ -1,5 +1,6 @@
 import logging
 
+from api.types import SpotifyPlaylist
 from liked_tracks import LikedTracks
 from playlist import PlaylistTrackAdder, TargetPlaylistSelector
 from ui import UserInterface
@@ -51,7 +52,7 @@ class TransferLikedTracksWorkflow:
 
         self._transfer_tracks(target_playlist, track_uris)
 
-    def _select_target_playlist(self) -> dict | None:
+    def _select_target_playlist(self) -> SpotifyPlaylist | None:
         """Выбрать целевой плейлист для переноса."""
         target_playlist = self.playlist_selector.select()
         if target_playlist is None:
@@ -99,7 +100,11 @@ class TransferLikedTracksWorkflow:
         self.ui.show_tracks_transfer_cancelled()
         return False
 
-    def _transfer_tracks(self, playlist: dict, track_uris: list[str]) -> None:
+    def _transfer_tracks(
+        self,
+        playlist: SpotifyPlaylist,
+        track_uris: list[str],
+    ) -> None:
         """Перенести треки в плейлист."""
         self.ui.show_tracks_transfer_started()
         logger.info(

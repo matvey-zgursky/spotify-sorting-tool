@@ -1,6 +1,8 @@
 import logging
+from typing import Self
 
 from actions import UserAction
+from api.types import SpotifyUser
 from auth import Authenticator
 from ui import UserInterface
 from workflow_factory import WorkflowFactory
@@ -13,7 +15,7 @@ class App:
 
     def __init__(
         self,
-        user: dict,
+        user: SpotifyUser,
         ui: UserInterface,
         workflow_factory: WorkflowFactory,
     ) -> None:
@@ -22,7 +24,7 @@ class App:
         self.workflow_factory = workflow_factory
 
     @classmethod
-    def create(cls) -> "App":
+    def create(cls: type[Self]) -> Self:
         """Создать приложение с авторизованным Spotify-клиентом."""
         logger.info("App creation started")
         authenticator = Authenticator()
