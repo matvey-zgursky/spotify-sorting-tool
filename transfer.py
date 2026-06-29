@@ -61,7 +61,7 @@ class TransferLikedTracksWorkflow:
 
         self.ui.show_selected_playlist(target_playlist)
         logger.info(
-            "Target playlist selected: playlist_id=%s playlist_name=%s",
+            "Target playlist selected: playlist_id=%s playlist_name=%r",
             target_playlist["id"],
             target_playlist["name"],
         )
@@ -108,7 +108,7 @@ class TransferLikedTracksWorkflow:
         """Перенести треки в плейлист."""
         self.ui.show_tracks_transfer_started()
         logger.info(
-            "Tracks transfer started: playlist_id=%s playlist_name=%s "
+            "Tracks transfer started: playlist_id=%s playlist_name=%r "
             "tracks_count=%s",
             playlist["id"],
             playlist["name"],
@@ -117,7 +117,7 @@ class TransferLikedTracksWorkflow:
         result = self.track_adder.add_tracks(playlist["id"], track_uris)
         self.ui.show_tracks_added(result, playlist)
         logger.info(
-            "Tracks transfer completed: playlist_id=%s playlist_name=%s "
+            "Tracks transfer completed: playlist_id=%s playlist_name=%r "
             "found_count=%s added_count=%s skipped_count=%s",
             playlist["id"],
             playlist["name"],

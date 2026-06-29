@@ -220,7 +220,7 @@ class PlaylistManager:
         """Проверить, может ли текущий пользователь добавлять треки."""
         can_add = playlist["owner_id"] == self.current_user_id
         logger.debug(
-            "Playlist edit permission checked: playlist_id=%s playlist_name=%s "
+            "Playlist edit permission checked: playlist_id=%s playlist_name=%r "
             "can_add=%s",
             playlist["id"],
             playlist["name"],
@@ -311,7 +311,7 @@ class TargetPlaylistSelector:
 
         if not self.playlist_manager.can_add_tracks(playlist):
             logger.info(
-                "Target playlist is not editable: playlist_id=%s playlist_name=%s",
+                "Target playlist is not editable: playlist_id=%s playlist_name=%r",
                 playlist["id"],
                 playlist["name"],
             )
@@ -319,7 +319,7 @@ class TargetPlaylistSelector:
             return PlaylistSelectionSignal.RETRY
 
         logger.info(
-            "Target playlist selected by id: playlist_id=%s playlist_name=%s",
+            "Target playlist selected by id: playlist_id=%s playlist_name=%r",
             playlist["id"],
             playlist["name"],
         )
@@ -359,7 +359,7 @@ class TargetPlaylistSelector:
             playlist = editable_playlists[0]
             logger.info(
                 "Target playlist selected by name: playlist_id=%s "
-                "playlist_name=%s",
+                "playlist_name=%r",
                 playlist["id"],
                 playlist["name"],
             )
@@ -372,7 +372,7 @@ class TargetPlaylistSelector:
         selected_playlist = self.ui.choose_playlist(editable_playlists)
         logger.info(
             "Target playlist selected from multiple matches: playlist_id=%s "
-            "playlist_name=%s",
+            "playlist_name=%r",
             selected_playlist["id"],
             selected_playlist["name"],
         )
@@ -391,7 +391,7 @@ class TargetPlaylistSelector:
             logger.info("Target playlist creation requested: source=name")
             playlist = self.playlist_manager.create(name)
             logger.info(
-                "Target playlist created: playlist_id=%s playlist_name=%s",
+                "Target playlist created: playlist_id=%s playlist_name=%r",
                 playlist["id"],
                 playlist["name"],
             )
@@ -413,7 +413,7 @@ class TargetPlaylistSelector:
             new_playlist_name = self.ui.ask_new_playlist_name()
             playlist = self.playlist_manager.create(new_playlist_name)
             logger.info(
-                "Target playlist created: playlist_id=%s playlist_name=%s",
+                "Target playlist created: playlist_id=%s playlist_name=%r",
                 playlist["id"],
                 playlist["name"],
             )

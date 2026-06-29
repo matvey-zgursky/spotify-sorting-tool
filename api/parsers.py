@@ -32,7 +32,7 @@ def parse_playlist(raw: Any) -> SpotifyPlaylist:
     playlist = _require_mapping(raw, "playlist")
     return {
         "id": _require_str(playlist, "id", "playlist"),
-        "name": _require_str(playlist, "name", "playlist"),
+        "name": _require_str(playlist, "name", "playlist", allow_empty=True),
         "owner_id": _parse_owner_id(playlist.get("owner")),
         "spotify_url": _parse_spotify_url(playlist.get("external_urls")),
     }
@@ -172,10 +172,16 @@ def _require_mapping(raw: Any, context: str) -> Mapping[str, Any]:
     return raw
 
 
-def _require_str(raw: Mapping[str, Any], key: str, context: str) -> str:
-    """Вернуть обязательную непустую строку из ответа."""
+def _require_str(
+    raw: Mapping[str, Any],
+    key: str,
+    context: str,
+    *,
+    allow_empty: bool = False,
+) -> str:
+    """Вернуть обязательную строку из ответа."""
     value = raw.get(key)
-    if not isinstance(value, str) or not value:
+    if not isinstance(value, str) or (not allow_empty and not value):
         raise SpotifyResponseError(f"missing {key} in {context}")
 
     return value
