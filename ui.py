@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from playlist import AddTracksResult
 
 MIN_SPOTIFY_YEAR = 2008
+UNTITLED_PLAYLIST_NAME = "[untitled playlist]"
 
 
 class UserInterface:
@@ -147,7 +148,8 @@ class UserInterface:
 
     def _format_playlist(self, playlist: SpotifyPlaylist) -> str:
         """Вернуть строку с названием и URL плейлиста."""
-        return f"{playlist['name']} ({self._get_playlist_url(playlist)})"
+        playlist_name = playlist["name"] or UNTITLED_PLAYLIST_NAME
+        return f"{playlist_name} ({self._get_playlist_url(playlist)})"
 
     def _get_playlist_url(self, playlist: SpotifyPlaylist) -> str:
         """Вернуть URL плейлиста Spotify или запасное значение, при отсутствии."""
