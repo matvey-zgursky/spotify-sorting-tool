@@ -5,7 +5,6 @@ from api.parsers import (
     parse_playlist_items_page,
     parse_playlists_page,
     parse_saved_tracks_page,
-    parse_snapshot_response,
     parse_user,
 )
 from api.request_executor import call_spotify
@@ -14,7 +13,6 @@ from api.types import (
     SpotifyPlaylistItemsPage,
     SpotifyPlaylistsPage,
     SpotifySavedTracksPage,
-    SpotifySnapshotResponse,
     SpotifyUser,
 )
 
@@ -47,14 +45,13 @@ class SpotifyClient:
         self,
         playlist_id: str,
         items: list[str],
-    ) -> SpotifySnapshotResponse:
+    ) -> None:
         """Добавить треки в плейлист."""
-        raw_response = call_spotify(
+        call_spotify(
             self.spotify.playlist_add_items,
             playlist_id=playlist_id,
             items=items,
         )
-        return parse_snapshot_response(raw_response)
 
     def playlist_items(
         self,

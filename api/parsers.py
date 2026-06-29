@@ -10,7 +10,6 @@ from api.types import (
     SpotifyPlaylistsPage,
     SpotifySavedTrackItem,
     SpotifySavedTracksPage,
-    SpotifySnapshotResponse,
     SpotifyTrack,
     SpotifyUser,
 )
@@ -71,14 +70,6 @@ def parse_playlists_page(raw: Any) -> SpotifyPlaylistsPage:
             _require_list(page, "items", "playlists page"),
         ),
         "next": _optional_next(page),
-    }
-
-
-def parse_snapshot_response(raw: Any) -> SpotifySnapshotResponse:
-    """Проверить ответ Spotify на изменение содержимого плейлиста."""
-    response = _require_mapping(raw, "snapshot response")
-    return {
-        "snapshot_id": _require_str(response, "snapshot_id", "snapshot response"),
     }
 
 

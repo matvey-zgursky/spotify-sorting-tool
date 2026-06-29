@@ -56,9 +56,3 @@ class SpotifyPlaylistsPage(TypedDict):
 
     items: list[SpotifyPlaylist]
     next: str | None
-
-
-class SpotifySnapshotResponse(TypedDict):
-    """Ответ Spotify на изменение содержимого плейлиста."""
-
-    snapshot_id: str
