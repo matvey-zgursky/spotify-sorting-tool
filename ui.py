@@ -146,6 +146,18 @@ class UserInterface:
             f"Skipped {result.skipped_count} duplicates.",
         )
 
+    def show_tracks_partially_added(
+        self,
+        result: AddTracksResult,
+        playlist: SpotifyPlaylist,
+    ) -> None:
+        """Показать частичный результат добавления треков перед ошибкой."""
+        formatted_playlist = self._format_playlist(playlist)
+        print(
+            f"Added {result.added_count} tracks to playlist before the error: "
+            f"{formatted_playlist}. Skipped {result.skipped_count} duplicates.",
+        )
+
     def _format_playlist(self, playlist: SpotifyPlaylist) -> str:
         """Вернуть строку с названием и URL плейлиста."""
         playlist_name = playlist["name"] or UNTITLED_PLAYLIST_NAME

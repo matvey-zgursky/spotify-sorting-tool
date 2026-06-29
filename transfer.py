@@ -2,7 +2,7 @@ import logging
 
 from api.types import SpotifyPlaylist
 from liked_tracks import LikedTracks
-from playlist import PlaylistTrackAdder, TargetPlaylistSelector
+from playlist import PlaylistTrackAddError, PlaylistTrackAdder, TargetPlaylistSelector
 from ui import UserInterface
 
 logger = logging.getLogger(__name__)
@@ -114,7 +114,21 @@ class TransferLikedTracksWorkflow:
             playlist["name"],
             len(track_uris),
         )
-        result = self.track_adder.add_tracks(playlist["id"], track_uris)
+        try:
+            result = self.track_adder.add_tracks(playlist["id"], track_uris)
+        except PlaylistTrackAddError as error:
+            self.ui.show_tracks_partially_added(error.result, playlist)
+            logger.error(
+                "Tracks transfer failed after partial add: playlist_id=%s "
+                "playlist_name=%r found_count=%s added_count=%s skipped_count=%s",
+                playlist["id"],
+                playlist["name"],
+                error.result.found_count,
+                error.result.added_count,
+                error.result.skipped_count,
+            )
+            raise
+
         self.ui.show_tracks_added(result, playlist)
         logger.info(
             "Tracks transfer completed: playlist_id=%s playlist_name=%r "
