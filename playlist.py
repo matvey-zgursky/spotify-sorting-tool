@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 
 from api.client import SpotifyClient
 from api.types import SpotifyPlaylist
+from errors import SpotifyAppError
 
 if TYPE_CHECKING:
     from ui import UserInterface
@@ -26,6 +27,14 @@ class AddTracksResult:
     found_count: int
     added_count: int
     skipped_count: int
+
+
+class PlaylistTrackAddError(SpotifyAppError):
+    """Ошибка добавления треков с частичным результатом операции."""
+
+    def __init__(self, result: AddTracksResult, cause: Exception) -> None:
+        self.result = result
+        super().__init__(str(cause))
 
 
 class PlaylistSelectionSignal(Enum):
@@ -66,17 +75,36 @@ class PlaylistTrackAdder:
             track_uris,
         )
 
+        added_count = 0
         for chunk in self._split_track_uris_chunks(new_track_uris):
             logger.info(
                 "Playlist track batch add started: playlist_id=%s batch_size=%s",
                 playlist_id,
                 len(chunk),
             )
-            self.spotify.playlist_add_items(playlist_id, chunk)
+            try:
+                self.spotify.playlist_add_items(playlist_id, chunk)
+                added_count += len(chunk)
+            except Exception as error:
+                result = AddTracksResult(
+                    found_count=len(track_uris),
+                    added_count=added_count,
+                    skipped_count=len(track_uris) - len(new_track_uris),
+                )
+                logger.error(
+                    "Playlist track batch add failed: playlist_id=%s "
+                    "batch_size=%s added_count=%s skipped_count=%s error=%s",
+                    playlist_id,
+                    len(chunk),
+                    result.added_count,
+                    result.skipped_count,
+                    error,
+                )
+                raise PlaylistTrackAddError(result, error) from error
 
         result = AddTracksResult(
             found_count=len(track_uris),
-            added_count=len(new_track_uris),
+            added_count=added_count,
             skipped_count=len(track_uris) - len(new_track_uris),
         )
         logger.info(
