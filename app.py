@@ -1,7 +1,6 @@
 import logging
 from typing import Self
 
-from actions import UserAction
 from api.types import SpotifyUser
 from auth import Authenticator
 from ui import UserInterface
@@ -45,9 +44,7 @@ class App:
         """Запустить приложение."""
         logger.info("App started")
         self.ui.show_authorized_user(self.user)
-        logger.info(
-            "Workflow selected: action=%s",
-            UserAction.TRANSFER_LIKED_TRACKS.value,
-        )
-        workflow = self.workflow_factory.create(UserAction.TRANSFER_LIKED_TRACKS)
+        action = self.ui.ask_user_action()
+        logger.info("Workflow selected: action=%s", action.value)
+        workflow = self.workflow_factory.create(action)
         workflow.run()

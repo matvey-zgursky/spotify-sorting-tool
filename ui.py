@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import date
 from typing import TYPE_CHECKING
 
+from actions import UserAction
 from api.types import SpotifyPlaylist, SpotifyUser
 
 if TYPE_CHECKING:
@@ -19,6 +20,25 @@ class UserInterface:
         """Показать текущего авторизованного пользователя."""
         display_name = user["display_name"] or user["id"]
         print(f"Authorized in Spotify as: {display_name}")
+
+    def ask_user_action(self) -> UserAction:
+        """Попросить пользователя выбрать действие."""
+        actions = {
+            "1": UserAction.TRANSFER_LIKED_TRACKS,
+            "2": UserAction.DELETE_LIKED_TRACKS,
+        }
+
+        print("Choose action:")
+        print("1. Transfer liked tracks to playlist")
+        print("2. Delete liked tracks")
+
+        while True:
+            choice = input("Enter action number: ").strip()
+            action = actions.get(choice)
+            if action is not None:
+                return action
+
+            print("Please enter a valid action number.")
 
     def ask_playlist_name_or_url(self) -> str:
         """Запросить название или URL плейлиста."""
