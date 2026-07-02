@@ -5,7 +5,8 @@ from api.client import SpotifyClient
 from api.types import SpotifySavedTracksPage
 from errors import SpotifyAppError
 
-SAVED_TRACKS_LIMIT = 50
+SAVED_TRACKS_PAGE_LIMIT = 50
+SAVED_TRACKS_DELETE_LIMIT = 40
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ class LikedTracks:
     def __init__(
         self,
         spotify: SpotifyClient,
-        page_limit: int = SAVED_TRACKS_LIMIT,
+        page_limit: int = SAVED_TRACKS_PAGE_LIMIT,
     ) -> None:
         self.spotify = spotify
         self.page_limit = page_limit
@@ -195,7 +196,7 @@ class LikedTrackRemover:
     def __init__(
         self,
         spotify: SpotifyClient,
-        remove_limit: int = SAVED_TRACKS_LIMIT,
+        remove_limit: int = SAVED_TRACKS_DELETE_LIMIT,
     ) -> None:
         self.spotify = spotify
         self.remove_limit = remove_limit

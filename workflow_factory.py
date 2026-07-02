@@ -3,7 +3,8 @@ from typing import Protocol
 
 from actions import UserAction
 from api.types import SpotifyUser
-from liked_tracks import LikedTracks
+from delete_liked_tracks import DeleteLikedTracksWorkflow
+from liked_tracks import LikedTrackRemover, LikedTracks
 from playlist import PlaylistManager, PlaylistTrackAdder, TargetPlaylistSelector
 from api.client import SpotifyClient
 from transfer import TransferLikedTracksWorkflow
@@ -51,12 +52,24 @@ class WorkflowFactory:
                 liked_tracks,
                 track_adder,
             )
-            logger.debug(
-                "Workflow created: action=%s workflow=%s",
-                action_value,
-                workflow.__class__.__name__,
+        elif action == UserAction.DELETE_LIKED_TRACKS:
+            liked_tracks = LikedTracks(self.spotify)
+            track_remover = LikedTrackRemover(self.spotify)
+            workflow = DeleteLikedTracksWorkflow(
+                self.ui,
+                liked_tracks,
+                track_remover,
             )
-            return workflow
+        else:
+            logger.error(
+                "Unsupported workflow action requested: action=%s",
+                action_value,
+            )
+            raise ValueError(f"Unsupported user action: {action_value}")
 
-        logger.error("Unsupported workflow action requested: action=%s", action_value)
-        raise ValueError(f"Unsupported user action: {action_value}")
+        logger.debug(
+            "Workflow created: action=%s workflow=%s",
+            action_value,
+            workflow.__class__.__name__,
+        )
+        return workflow
