@@ -1,11 +1,30 @@
 import logging
+from dataclasses import dataclass
 
 from api.client import SpotifyClient
 from api.types import SpotifySavedTracksPage
+from errors import SpotifyAppError
 
 SAVED_TRACKS_PAGE_LIMIT = 50
+SAVED_TRACKS_DELETE_LIMIT = 40
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class RemoveTracksResult:
+    """Результат удаления треков из любимых."""
+
+    found_count: int
+    removed_count: int
+
+
+class LikedTrackRemoveError(SpotifyAppError):
+    """Ошибка удаления любимых треков с частичным результатом операции."""
+
+    def __init__(self, result: RemoveTracksResult, cause: Exception) -> None:
+        self.result = result
+        super().__init__(str(cause))
 
 
 class LikedTracks:
@@ -169,3 +188,64 @@ class LikedTracks:
             len(track_uris),
         )
         return track_uris
+
+
+class LikedTrackRemover:
+    """Удаляет треки из любимых треков текущего пользователя."""
+
+    def __init__(
+        self,
+        spotify: SpotifyClient,
+        remove_limit: int = SAVED_TRACKS_DELETE_LIMIT,
+    ) -> None:
+        self.spotify = spotify
+        self.remove_limit = remove_limit
+
+    def remove_tracks(self, track_uris: list[str]) -> RemoveTracksResult:
+        """Удалить треки из любимых."""
+        logger.info(
+            "Liked tracks remove started: tracks_count=%s",
+            len(track_uris),
+        )
+        removed_count = 0
+
+        for chunk in self._split_track_uris_chunks(track_uris):
+            logger.info(
+                "Liked tracks remove batch started: batch_size=%s",
+                len(chunk),
+            )
+            try:
+                self.spotify.current_user_saved_tracks_delete(chunk)
+                removed_count += len(chunk)
+            except Exception as error:
+                result = RemoveTracksResult(
+                    found_count=len(track_uris),
+                    removed_count=removed_count,
+                )
+                logger.error(
+                    "Liked tracks remove batch failed: batch_size=%s "
+                    "found_count=%s removed_count=%s error=%s",
+                    len(chunk),
+                    result.found_count,
+                    result.removed_count,
+                    error,
+                )
+                raise LikedTrackRemoveError(result, error) from error
+
+        result = RemoveTracksResult(
+            found_count=len(track_uris),
+            removed_count=removed_count,
+        )
+        logger.info(
+            "Liked tracks remove completed: found_count=%s removed_count=%s",
+            result.found_count,
+            result.removed_count,
+        )
+        return result
+
+    def _split_track_uris_chunks(self, track_uris: list[str]) -> list[list[str]]:
+        """Разбить URI треков на чанки для удаления."""
+        return [
+            track_uris[index : index + self.remove_limit]
+            for index in range(0, len(track_uris), self.remove_limit)
+        ]

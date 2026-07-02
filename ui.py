@@ -3,9 +3,11 @@ from __future__ import annotations
 from datetime import date
 from typing import TYPE_CHECKING
 
+from actions import UserAction
 from api.types import SpotifyPlaylist, SpotifyUser
 
 if TYPE_CHECKING:
+    from liked_tracks import RemoveTracksResult
     from playlist import AddTracksResult
 
 MIN_SPOTIFY_YEAR = 2008
@@ -19,6 +21,25 @@ class UserInterface:
         """Показать текущего авторизованного пользователя."""
         display_name = user["display_name"] or user["id"]
         print(f"Authorized in Spotify as: {display_name}")
+
+    def ask_user_action(self) -> UserAction:
+        """Попросить пользователя выбрать действие."""
+        actions = {
+            "1": UserAction.TRANSFER_LIKED_TRACKS,
+            "2": UserAction.DELETE_LIKED_TRACKS,
+        }
+
+        print("Choose action:")
+        print("1. Transfer liked tracks to playlist")
+        print("2. Delete liked tracks")
+
+        while True:
+            choice = input("Enter action number: ").strip()
+            action = actions.get(choice)
+            if action is not None:
+                return action
+
+            print("Please enter a valid action number.")
 
     def ask_playlist_name_or_url(self) -> str:
         """Запросить название или URL плейлиста."""
@@ -126,13 +147,25 @@ class UserInterface:
         """Спросить, подтверждает ли пользователь перенос треков."""
         return self.ask_yes_no("Do you want to transfer these tracks?")
 
+    def ask_confirm_tracks_delete(self) -> bool:
+        """Спросить, подтверждает ли пользователь удаление треков."""
+        return self.ask_yes_no("Do you want to delete these tracks?")
+
     def show_tracks_transfer_cancelled(self) -> None:
         """Сообщить, что пользователь отменил перенос треков."""
         print("Tracks transfer cancelled.")
 
+    def show_tracks_delete_cancelled(self) -> None:
+        """Сообщить, что пользователь отменил удаление треков."""
+        print("Tracks delete cancelled.")
+
     def show_tracks_transfer_started(self) -> None:
         """Сообщить, что перенос треков начался."""
         print("Adding tracks to playlist...")
+
+    def show_tracks_delete_started(self) -> None:
+        """Сообщить, что удаление треков началось."""
+        print("Deleting tracks from liked tracks...")
 
     def show_tracks_added(
         self,
@@ -146,6 +179,10 @@ class UserInterface:
             f"Skipped {result.skipped_count} duplicates.",
         )
 
+    def show_tracks_deleted(self, result: RemoveTracksResult) -> None:
+        """Показать результат удаления треков из любимых."""
+        print(f"Deleted {result.removed_count} liked tracks.")
+
     def show_tracks_partially_added(
         self,
         result: AddTracksResult,
@@ -156,6 +193,12 @@ class UserInterface:
         print(
             f"Added {result.added_count} tracks to playlist before the error: "
             f"{formatted_playlist}. Skipped {result.skipped_count} duplicates.",
+        )
+
+    def show_tracks_partially_deleted(self, result: RemoveTracksResult) -> None:
+        """Показать частичный результат удаления треков перед ошибкой."""
+        print(
+            f"Deleted {result.removed_count} liked tracks before the error.",
         )
 
     def _format_playlist(self, playlist: SpotifyPlaylist) -> str:
