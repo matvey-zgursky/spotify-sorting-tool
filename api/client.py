@@ -53,6 +53,13 @@ class SpotifyClient:
             items=items,
         )
 
+    def current_user_saved_tracks_delete(self, tracks: list[str]) -> None:
+        """Удалить треки из любимых треков текущего пользователя."""
+        call_spotify(
+            self.spotify.current_user_saved_tracks_delete,
+            tracks=tracks,
+        )
+
     def playlist_items(
         self,
         playlist_id: str,
