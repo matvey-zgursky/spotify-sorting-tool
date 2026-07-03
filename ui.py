@@ -151,6 +151,12 @@ class UserInterface:
         """Спросить, подтверждает ли пользователь удаление треков."""
         return self.ask_yes_no("Do you want to delete these tracks?")
 
+    def ask_delete_transferred_tracks(self) -> bool:
+        """Спросить, нужно ли удалить перенесенные треки из любимых."""
+        return self.ask_yes_no(
+            "Do you want to delete transferred tracks from liked tracks?",
+        )
+
     def show_tracks_transfer_cancelled(self) -> None:
         """Сообщить, что пользователь отменил перенос треков."""
         print("Tracks transfer cancelled.")

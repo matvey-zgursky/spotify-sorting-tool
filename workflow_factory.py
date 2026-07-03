@@ -46,11 +46,13 @@ class WorkflowFactory:
             )
             liked_tracks = LikedTracks(self.spotify)
             track_adder = PlaylistTrackAdder(self.spotify)
+            track_remover = LikedTrackRemover(self.spotify)
             workflow = TransferLikedTracksWorkflow(
                 self.ui,
                 playlist_selector,
                 liked_tracks,
                 track_adder,
+                track_remover,
             )
         elif action == UserAction.DELETE_LIKED_TRACKS:
             liked_tracks = LikedTracks(self.spotify)

@@ -1,8 +1,13 @@
 import logging
 
 from api.types import SpotifyPlaylist
-from liked_tracks import LikedTracks
-from playlist import PlaylistTrackAddError, PlaylistTrackAdder, TargetPlaylistSelector
+from liked_tracks import LikedTrackRemoveError, LikedTrackRemover, LikedTracks
+from playlist import (
+    AddTracksResult,
+    PlaylistTrackAddError,
+    PlaylistTrackAdder,
+    TargetPlaylistSelector,
+)
 from ui import UserInterface
 
 logger = logging.getLogger(__name__)
@@ -17,11 +22,13 @@ class TransferLikedTracksWorkflow:
         playlist_selector: TargetPlaylistSelector,
         liked_tracks: LikedTracks,
         track_adder: PlaylistTrackAdder,
+        track_remover: LikedTrackRemover,
     ) -> None:
         self.ui = ui
         self.playlist_selector = playlist_selector
         self.liked_tracks = liked_tracks
         self.track_adder = track_adder
+        self.track_remover = track_remover
 
     def run(self) -> None:
         """Перенести любимые треки за выбранный год в выбранный плейлист."""
@@ -50,7 +57,8 @@ class TransferLikedTracksWorkflow:
             )
             return
 
-        self._transfer_tracks(target_playlist, track_uris)
+        result = self._transfer_tracks(target_playlist, track_uris)
+        self._delete_transferred_tracks(result.added_track_uris)
 
     def _select_target_playlist(self) -> SpotifyPlaylist | None:
         """Выбрать целевой плейлист для переноса."""
@@ -104,7 +112,7 @@ class TransferLikedTracksWorkflow:
         self,
         playlist: SpotifyPlaylist,
         track_uris: list[str],
-    ) -> None:
+    ) -> AddTracksResult:
         """Перенести треки в плейлист."""
         self.ui.show_tracks_transfer_started()
         logger.info(
@@ -138,4 +146,43 @@ class TransferLikedTracksWorkflow:
             result.found_count,
             result.added_count,
             result.skipped_count,
+        )
+        return result
+
+    def _delete_transferred_tracks(self, track_uris: list[str]) -> None:
+        """Удалить успешно перенесенные треки из любимых."""
+        if not track_uris:
+            logger.info("Transferred tracks delete skipped: no tracks added")
+            return
+
+        if not self.ui.ask_delete_transferred_tracks():
+            logger.info(
+                "Transferred tracks delete declined: tracks_count=%s",
+                len(track_uris),
+            )
+            self.ui.show_tracks_delete_cancelled()
+            return
+
+        self.ui.show_tracks_delete_started()
+        logger.info(
+            "Transferred tracks delete started: tracks_count=%s",
+            len(track_uris),
+        )
+        try:
+            result = self.track_remover.remove_tracks(track_uris)
+        except LikedTrackRemoveError as error:
+            self.ui.show_tracks_partially_deleted(error.result)
+            logger.error(
+                "Transferred tracks delete failed after partial remove: "
+                "found_count=%s removed_count=%s",
+                error.result.found_count,
+                error.result.removed_count,
+            )
+            raise
+
+        self.ui.show_tracks_deleted(result)
+        logger.info(
+            "Transferred tracks delete completed: found_count=%s removed_count=%s",
+            result.found_count,
+            result.removed_count,
         )
