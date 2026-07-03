@@ -44,7 +44,13 @@ class App:
         """Запустить приложение."""
         logger.info("App started")
         self.ui.show_authorized_user(self.user)
-        action = self.ui.ask_user_action()
-        logger.info("Workflow selected: action=%s", action.value)
-        workflow = self.workflow_factory.create(action)
-        workflow.run()
+
+        while True:
+            action = self.ui.ask_user_action()
+            logger.info("Workflow selected: action=%s", action.value)
+            workflow = self.workflow_factory.create(action)
+            workflow.run()
+
+            if not self.ui.ask_continue():
+                logger.info("App stopped by user")
+                return

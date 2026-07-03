@@ -41,6 +41,10 @@ class UserInterface:
 
             print("Please enter a valid action number.")
 
+    def ask_continue(self) -> bool:
+        """Спросить, хочет ли пользователь выполнить еще одно действие."""
+        return self.ask_yes_no("Do you want to do anything else?")
+
     def ask_playlist_name_or_url(self) -> str:
         """Запросить название или URL плейлиста."""
         while True:
