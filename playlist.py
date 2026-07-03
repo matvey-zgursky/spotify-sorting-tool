@@ -27,6 +27,7 @@ class AddTracksResult:
     found_count: int
     added_count: int
     skipped_count: int
+    added_track_uris: list[str]
 
 
 class PlaylistTrackAddError(SpotifyAppError):
@@ -75,7 +76,7 @@ class PlaylistTrackAdder:
             track_uris,
         )
 
-        added_count = 0
+        added_track_uris: list[str] = []
         for chunk in self._split_track_uris_chunks(new_track_uris):
             logger.info(
                 "Playlist track batch add started: playlist_id=%s batch_size=%s",
@@ -84,12 +85,13 @@ class PlaylistTrackAdder:
             )
             try:
                 self.spotify.playlist_add_items(playlist_id, chunk)
-                added_count += len(chunk)
+                added_track_uris.extend(chunk)
             except Exception as error:
                 result = AddTracksResult(
                     found_count=len(track_uris),
-                    added_count=added_count,
+                    added_count=len(added_track_uris),
                     skipped_count=len(track_uris) - len(new_track_uris),
+                    added_track_uris=added_track_uris.copy(),
                 )
                 logger.error(
                     "Playlist track batch add failed: playlist_id=%s "
@@ -104,8 +106,9 @@ class PlaylistTrackAdder:
 
         result = AddTracksResult(
             found_count=len(track_uris),
-            added_count=added_count,
+            added_count=len(added_track_uris),
             skipped_count=len(track_uris) - len(new_track_uris),
+            added_track_uris=added_track_uris.copy(),
         )
         logger.info(
             "Playlist track add completed: playlist_id=%s found_count=%s "
