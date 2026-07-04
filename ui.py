@@ -22,6 +22,10 @@ class UserInterface:
         display_name = user["display_name"] or user["id"]
         print(f"Authorized in Spotify as: {display_name}")
 
+    def show_interrupt_hint(self) -> None:
+        """Показать подсказку о завершении программы."""
+        print("Press Ctrl+C at any time to exit.")
+
     def ask_user_action(self) -> UserAction:
         """Попросить пользователя выбрать действие."""
         actions = {
