@@ -1,5 +1,6 @@
 import logging
 import os
+import webbrowser
 
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
@@ -50,8 +51,29 @@ class Authenticator:
         auth_manager = SpotifyOAuth(
             scope=self.SCOPES,
             cache_path=self.TOKEN_CACHE_PATH,
-            open_browser=False,
+            open_browser=self._can_open_browser(),
         )
         spotify_client = SpotifyClient(spotipy.Spotify(auth_manager=auth_manager))
         logger.info("Spotify client created")
         return spotify_client
+
+    def _can_open_browser(self) -> bool:
+        """Проверить, можно ли просить spotipy открыть браузер."""
+        if self._is_wsl():
+            logger.info("Browser opening disabled: WSL uses interactive auth URL")
+            return False
+
+        try:
+            webbrowser.get()
+        except webbrowser.Error:
+            logger.info("Browser opening disabled: no browser controller found")
+            return False
+
+        logger.info("Browser opening enabled")
+        return True
+
+    def _is_wsl(self) -> bool:
+        """Проверить, запущено ли приложение в WSL."""
+        uname = getattr(os, "uname", None)
+        release = uname().release.lower() if uname is not None else ""
+        return "microsoft" in release or "WSL_INTEROP" in os.environ
