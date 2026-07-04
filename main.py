@@ -16,6 +16,10 @@ def main() -> None:
         configure_logging()
         app = App.create()
         app.run()
+    except KeyboardInterrupt:
+        logger.info("Application interrupted by user")
+        print("\nProgram interrupted. Exiting...")
+        raise SystemExit(130)
     except SpotifyAppError as error:
         logger.error("Application error: %s", error)
         print(error)

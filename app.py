@@ -43,6 +43,7 @@ class App:
     def run(self) -> None:
         """Запустить приложение."""
         logger.info("App started")
+        self.ui.show_interrupt_hint()
         self.ui.show_authorized_user(self.user)
 
         while True:
