@@ -34,12 +34,12 @@ class LikedTracks:
         """Вернуть год добавления самого старого трека на странице."""
         return self._get_added_year(page["items"][-1]["added_at"])
 
-    def _find_first_page_not_newer_than_year(
+    def _find_first_page_with_old_enough_tracks(
         self,
         year: int,
         total: int,
     ) -> int | None:
-        """Найти первую страницу, где последний трек добавлен не позже указанного года."""
+        """Найти первую страницу, где могут быть треки указанного года."""
         left_page = 0
         right_page = (total - 1) // self.page_limit
         result = None
@@ -77,7 +77,7 @@ class LikedTracks:
             )
             return 0
 
-        start_page = self._find_first_page_not_newer_than_year(year, total)
+        start_page = self._find_first_page_with_old_enough_tracks(year, total)
         logger.info(
             "Liked tracks start page selected: year=%s start_page=%s",
             year,
