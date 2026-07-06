@@ -3,7 +3,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from liked_tracks import LikedTrackRemoveError, LikedTrackRemover, LikedTracks
+from liked_tracks import LikedTracks
+from liked_tracks_remover import LikedTrackRemoveError, SpotifyLikedTracksRemover
 
 if TYPE_CHECKING:
     from ui import UserInterface
@@ -43,17 +44,17 @@ class LikedTracksDeleter:
     def __init__(
         self,
         ui: UserInterface,
-        track_remover: LikedTrackRemover,
+        spotify_remover: SpotifyLikedTracksRemover,
     ) -> None:
         self.ui = ui
-        self.track_remover = track_remover
+        self.spotify_remover = spotify_remover
 
     def delete(self, track_uris: list[str]) -> None:
         """Удалить треки из любимых."""
         self.ui.show_tracks_delete_started()
         logger.info("Tracks delete started: tracks_count=%s", len(track_uris))
         try:
-            result = self.track_remover.remove_tracks(track_uris)
+            result = self.spotify_remover.remove(track_uris)
         except LikedTrackRemoveError as error:
             self.ui.show_tracks_partially_deleted(error.result)
             logger.error(
