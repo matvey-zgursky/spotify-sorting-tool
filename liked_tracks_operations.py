@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from liked_tracks import LikedTracks
+from liked_tracks import LikedTrackRemoveError, LikedTrackRemover, LikedTracks
 
 if TYPE_CHECKING:
     from ui import UserInterface
@@ -35,3 +35,38 @@ class LikedTracksFinder:
             self.ui.show_no_liked_tracks_found(year)
 
         return track_uris
+
+
+class LikedTracksDeleter:
+    """Удаляет любимые треки."""
+
+    def __init__(
+        self,
+        ui: UserInterface,
+        track_remover: LikedTrackRemover,
+    ) -> None:
+        self.ui = ui
+        self.track_remover = track_remover
+
+    def delete(self, track_uris: list[str]) -> None:
+        """Удалить треки из любимых."""
+        self.ui.show_tracks_delete_started()
+        logger.info("Tracks delete started: tracks_count=%s", len(track_uris))
+        try:
+            result = self.track_remover.remove_tracks(track_uris)
+        except LikedTrackRemoveError as error:
+            self.ui.show_tracks_partially_deleted(error.result)
+            logger.error(
+                "Tracks delete failed after partial remove: found_count=%s "
+                "removed_count=%s",
+                error.result.found_count,
+                error.result.removed_count,
+            )
+            raise
+
+        self.ui.show_tracks_deleted(result)
+        logger.info(
+            "Tracks delete completed: found_count=%s removed_count=%s",
+            result.found_count,
+            result.removed_count,
+        )

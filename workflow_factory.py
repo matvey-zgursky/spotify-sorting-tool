@@ -7,7 +7,7 @@ from api.client import SpotifyClient
 from api.types import SpotifyUser
 from delete_liked_tracks import DeleteLikedTracksWorkflow
 from liked_tracks import LikedTrackRemover, LikedTracks
-from liked_tracks_operations import LikedTracksFinder
+from liked_tracks_operations import LikedTracksDeleter, LikedTracksFinder
 from playlist import PlaylistManager, PlaylistTrackAdder, TargetPlaylistSelector
 from transfer import TransferLikedTracksWorkflow
 from ui import UserInterface
@@ -70,7 +70,7 @@ class WorkflowFactory:
             TargetPlaylistSelector(playlist_manager, self.ui),
             LikedTracksFinder(self.ui, LikedTracks(self.spotify)),
             PlaylistTrackAdder(self.spotify),
-            LikedTrackRemover(self.spotify),
+            LikedTracksDeleter(self.ui, LikedTrackRemover(self.spotify)),
         )
 
     def _create_delete_workflow(self) -> DeleteLikedTracksWorkflow:
@@ -78,5 +78,5 @@ class WorkflowFactory:
         return DeleteLikedTracksWorkflow(
             self.ui,
             LikedTracksFinder(self.ui, LikedTracks(self.spotify)),
-            LikedTrackRemover(self.spotify),
+            LikedTracksDeleter(self.ui, LikedTrackRemover(self.spotify)),
         )

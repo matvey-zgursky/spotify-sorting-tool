@@ -1,8 +1,7 @@
 import logging
 
 from api.types import SpotifyPlaylist
-from liked_tracks import LikedTrackRemoveError, LikedTrackRemover
-from liked_tracks_operations import LikedTracksFinder
+from liked_tracks_operations import LikedTracksDeleter, LikedTracksFinder
 from playlist import (
     AddTracksResult,
     PlaylistTrackAddError,
@@ -23,13 +22,13 @@ class TransferLikedTracksWorkflow:
         playlist_selector: TargetPlaylistSelector,
         liked_tracks_finder: LikedTracksFinder,
         track_adder: PlaylistTrackAdder,
-        track_remover: LikedTrackRemover,
+        liked_tracks_deleter: LikedTracksDeleter,
     ) -> None:
         self.ui = ui
         self.playlist_selector = playlist_selector
         self.liked_tracks_finder = liked_tracks_finder
         self.track_adder = track_adder
-        self.track_remover = track_remover
+        self.liked_tracks_deleter = liked_tracks_deleter
 
     def run(self) -> None:
         """Перенести любимые треки за выбранный год в выбранный плейлист."""
@@ -150,26 +149,8 @@ class TransferLikedTracksWorkflow:
             self.ui.show_tracks_delete_cancelled()
             return
 
-        self.ui.show_tracks_delete_started()
         logger.info(
             "Transferred tracks delete started: tracks_count=%s",
             len(track_uris),
         )
-        try:
-            result = self.track_remover.remove_tracks(track_uris)
-        except LikedTrackRemoveError as error:
-            self.ui.show_tracks_partially_deleted(error.result)
-            logger.error(
-                "Transferred tracks delete failed after partial remove: "
-                "found_count=%s removed_count=%s",
-                error.result.found_count,
-                error.result.removed_count,
-            )
-            raise
-
-        self.ui.show_tracks_deleted(result)
-        logger.info(
-            "Transferred tracks delete completed: found_count=%s removed_count=%s",
-            result.found_count,
-            result.removed_count,
-        )
+        self.liked_tracks_deleter.delete(track_uris)
