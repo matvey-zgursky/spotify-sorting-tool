@@ -26,8 +26,8 @@ class LikedTracks:
             offset=page_index * self.page_limit,
         )
 
-    def _get_last_item_year(self, page: SpotifySavedTracksPage) -> int:
-        """Вернуть год добавления последнего трека на странице."""
+    def _get_oldest_track_year(self, page: SpotifySavedTracksPage) -> int:
+        """Вернуть год добавления самого старого трека на странице."""
         return int(page["items"][-1]["added_at"][:4])
 
     def _find_first_page_not_newer_than_year(
@@ -43,15 +43,16 @@ class LikedTracks:
         while left_page <= right_page:
             middle_page = (left_page + right_page) // 2
             page = self._get_saved_tracks_page(middle_page)
-            last_year = self._get_last_item_year(page)
+            oldest_track_year = self._get_oldest_track_year(page)
             logger.debug(
-                "Liked tracks start page probe: year=%s page=%s last_year=%s",
+                "Liked tracks start page probe: year=%s page=%s "
+                "oldest_track_year=%s",
                 year,
                 middle_page,
-                last_year,
+                oldest_track_year,
             )
 
-            if last_year > year:
+            if oldest_track_year > year:
                 left_page = middle_page + 1
             else:
                 result = middle_page
