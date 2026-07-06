@@ -1,6 +1,7 @@
 import logging
 
-from liked_tracks import LikedTrackRemoveError, LikedTrackRemover, LikedTracks
+from liked_tracks import LikedTrackRemoveError, LikedTrackRemover
+from liked_tracks_operations import LikedTracksFinder
 from ui import UserInterface
 
 logger = logging.getLogger(__name__)
@@ -12,11 +13,11 @@ class DeleteLikedTracksWorkflow:
     def __init__(
         self,
         ui: UserInterface,
-        liked_tracks: LikedTracks,
+        liked_tracks_finder: LikedTracksFinder,
         track_remover: LikedTrackRemover,
     ) -> None:
         self.ui = ui
-        self.liked_tracks = liked_tracks
+        self.liked_tracks_finder = liked_tracks_finder
         self.track_remover = track_remover
 
     def run(self) -> None:
@@ -25,7 +26,7 @@ class DeleteLikedTracksWorkflow:
         year = self.ui.ask_added_year()
         logger.info("Added year selected: year=%s", year)
 
-        track_uris = self._find_liked_tracks(year)
+        track_uris = self.liked_tracks_finder.find_uris_by_added_year(year)
         if not track_uris:
             logger.info(
                 "Delete liked tracks workflow stopped: no liked tracks found "
@@ -43,20 +44,6 @@ class DeleteLikedTracksWorkflow:
             return
 
         self._delete_tracks(track_uris)
-
-    def _find_liked_tracks(self, year: int) -> list[str]:
-        """Найти URI любимых треков за год."""
-        self.ui.show_liked_tracks_search_started(year)
-        track_uris = self.liked_tracks.get_uris_by_added_year(year)
-        logger.info(
-            "Liked tracks found: year=%s tracks_count=%s",
-            year,
-            len(track_uris),
-        )
-        if not track_uris:
-            self.ui.show_no_liked_tracks_found(year)
-
-        return track_uris
 
     def _confirm_delete(self, tracks_count: int, year: int) -> bool:
         """Подтвердить удаление найденных треков."""

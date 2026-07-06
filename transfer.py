@@ -1,7 +1,8 @@
 import logging
 
 from api.types import SpotifyPlaylist
-from liked_tracks import LikedTrackRemoveError, LikedTrackRemover, LikedTracks
+from liked_tracks import LikedTrackRemoveError, LikedTrackRemover
+from liked_tracks_operations import LikedTracksFinder
 from playlist import (
     AddTracksResult,
     PlaylistTrackAddError,
@@ -20,13 +21,13 @@ class TransferLikedTracksWorkflow:
         self,
         ui: UserInterface,
         playlist_selector: TargetPlaylistSelector,
-        liked_tracks: LikedTracks,
+        liked_tracks_finder: LikedTracksFinder,
         track_adder: PlaylistTrackAdder,
         track_remover: LikedTrackRemover,
     ) -> None:
         self.ui = ui
         self.playlist_selector = playlist_selector
-        self.liked_tracks = liked_tracks
+        self.liked_tracks_finder = liked_tracks_finder
         self.track_adder = track_adder
         self.track_remover = track_remover
 
@@ -40,7 +41,7 @@ class TransferLikedTracksWorkflow:
             logger.info("Transfer liked tracks workflow stopped: no target playlist")
             return
 
-        track_uris = self._find_liked_tracks(year)
+        track_uris = self.liked_tracks_finder.find_uris_by_added_year(year)
         if not track_uris:
             logger.info(
                 "Transfer liked tracks workflow stopped: no liked tracks found "
@@ -74,20 +75,6 @@ class TransferLikedTracksWorkflow:
             target_playlist["name"],
         )
         return target_playlist
-
-    def _find_liked_tracks(self, year: int) -> list[str]:
-        """Найти URI любимых треков за год."""
-        self.ui.show_liked_tracks_search_started(year)
-        track_uris = self.liked_tracks.get_uris_by_added_year(year)
-        logger.info(
-            "Liked tracks found: year=%s tracks_count=%s",
-            year,
-            len(track_uris),
-        )
-        if not track_uris:
-            self.ui.show_no_liked_tracks_found(year)
-
-        return track_uris
 
     def _confirm_transfer(self, tracks_count: int, year: int) -> bool:
         """Подтвердить перенос найденных треков."""
