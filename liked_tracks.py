@@ -1,4 +1,5 @@
 import logging
+from dataclasses import dataclass
 
 from api.client import SpotifyClient
 from api.types import SpotifySavedTracksPage
@@ -6,6 +7,19 @@ from api.types import SpotifySavedTracksPage
 SAVED_TRACKS_PAGE_LIMIT = 50
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class _SavedTracksPageScan:
+    """Результат сканирования одной страницы любимых треков."""
+
+    track_uris: list[str]
+    stop_year: int | None = None
+
+    @property
+    def should_stop(self) -> bool:
+        """Вернуть True, если дальнейшее сканирование страниц не нужно."""
+        return self.stop_year is not None
 
 
 class LikedTracks:
@@ -101,31 +115,27 @@ class LikedTracks:
             else:
                 page = self._get_saved_tracks_page(page_index)
 
-            page_matches_count = 0
-            for item in page["items"]:
-                added_year = self._get_added_year(item["added_at"])
+            page_scan = self._scan_track_uris_by_added_year(page, year)
+            track_uris.extend(page_scan.track_uris)
 
-                if added_year == year:
-                    track_uris.append(item["track"]["uri"])
-                    page_matches_count += 1
-                elif added_year < year:
-                    logger.debug(
-                        "Liked tracks page scan stopped: year=%s page=%s "
-                        "matched_count=%s tracks_count=%s stop_year=%s",
-                        year,
-                        page_index,
-                        page_matches_count,
-                        len(track_uris),
-                        added_year,
-                    )
-                    return track_uris
+            if page_scan.should_stop:
+                logger.debug(
+                    "Liked tracks page scan stopped: year=%s page=%s "
+                    "matched_count=%s tracks_count=%s stop_year=%s",
+                    year,
+                    page_index,
+                    len(page_scan.track_uris),
+                    len(track_uris),
+                    page_scan.stop_year,
+                )
+                return track_uris
 
             logger.debug(
                 "Liked tracks page scanned: year=%s page=%s matched_count=%s "
                 "tracks_count=%s",
                 year,
                 page_index,
-                page_matches_count,
+                len(page_scan.track_uris),
                 len(track_uris),
             )
 
@@ -135,6 +145,24 @@ class LikedTracks:
             page_index += 1
 
         return track_uris
+
+    def _scan_track_uris_by_added_year(
+        self,
+        page: SpotifySavedTracksPage,
+        year: int,
+    ) -> _SavedTracksPageScan:
+        """Собрать URI треков указанного года на одной странице."""
+        track_uris: list[str] = []
+
+        for item in page["items"]:
+            added_year = self._get_added_year(item["added_at"])
+
+            if added_year == year:
+                track_uris.append(item["track"]["uri"])
+            elif added_year < year:
+                return _SavedTracksPageScan(track_uris, added_year)
+
+        return _SavedTracksPageScan(track_uris)
 
     def get_uris_by_added_year(
         self,
