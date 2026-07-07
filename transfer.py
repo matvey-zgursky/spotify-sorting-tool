@@ -2,7 +2,7 @@ import logging
 
 from api.types import SpotifyPlaylist
 from liked_tracks_operations import LikedTracksDeleter, LikedTracksFinder
-from playlist import TargetPlaylistSelector
+from playlist_selection import TargetPlaylistSelector
 from playlist_track_adder import (
     AddTracksResult,
     PlaylistTrackAddError,
