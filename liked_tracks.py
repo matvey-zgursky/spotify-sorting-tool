@@ -22,8 +22,8 @@ class _SavedTracksPageScan:
         return self.stop_year is not None
 
 
-class LikedTracks:
-    """Работает с любимыми треками текущего пользователя Spotify."""
+class SpotifyLikedTracksReader:
+    """Читает любимые треки текущего пользователя из Spotify."""
 
     def __init__(
         self,

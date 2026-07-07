@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from liked_tracks import LikedTracks
+from liked_tracks import SpotifyLikedTracksReader
 from liked_tracks_remover import LikedTrackRemoveError, SpotifyLikedTracksRemover
 
 if TYPE_CHECKING:
@@ -18,15 +18,15 @@ class LikedTracksFinder:
     def __init__(
         self,
         ui: UserInterface,
-        liked_tracks: LikedTracks,
+        spotify_reader: SpotifyLikedTracksReader,
     ) -> None:
         self.ui = ui
-        self.liked_tracks = liked_tracks
+        self.spotify_reader = spotify_reader
 
     def find_uris_by_added_year(self, year: int) -> list[str]:
         """Найти URI любимых треков за год добавления."""
         self.ui.show_liked_tracks_search_started(year)
-        track_uris = self.liked_tracks.get_uris_by_added_year(year)
+        track_uris = self.spotify_reader.get_uris_by_added_year(year)
         logger.info(
             "Liked tracks found: year=%s tracks_count=%s",
             year,
