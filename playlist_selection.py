@@ -5,7 +5,7 @@ import logging
 from typing import TYPE_CHECKING, Literal, TypeAlias
 
 from api.types import SpotifyPlaylist
-from playlist import SpotifyPlaylistManager
+from playlist_manager import SpotifyPlaylistManager
 from playlist_id_parser import parse_playlist_id
 
 if TYPE_CHECKING:

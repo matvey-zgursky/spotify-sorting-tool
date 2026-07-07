@@ -9,7 +9,7 @@ from delete_liked_tracks import DeleteLikedTracksWorkflow
 from liked_tracks_reader import SpotifyLikedTracksReader
 from liked_tracks_operations import LikedTracksDeleter, LikedTracksFinder
 from liked_tracks_remover import SpotifyLikedTracksRemover
-from playlist import SpotifyPlaylistManager
+from playlist_manager import SpotifyPlaylistManager
 from playlist_selection import TargetPlaylistSelector
 from playlist_track_adder import PlaylistTrackAdder
 from transfer import TransferLikedTracksWorkflow
