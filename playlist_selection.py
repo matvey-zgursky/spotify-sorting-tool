@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Literal, TypeAlias
 
 from api.types import SpotifyPlaylist
 from playlist import PlaylistManager
+from playlist_id_parser import parse_playlist_id
 
 if TYPE_CHECKING:
     from ui import UserInterface
@@ -37,9 +38,7 @@ class TargetPlaylistSelector:
         """Запросить и вернуть плейлист или None при отказе."""
         while True:
             playlist_name_or_url = self.ui.ask_playlist_name_or_url()
-            playlist_id = self.playlist_manager.extract_playlist_id(
-                playlist_name_or_url,
-            )
+            playlist_id = parse_playlist_id(playlist_name_or_url)
 
             if playlist_id:
                 logger.info("Target playlist input received: input_type=id")
