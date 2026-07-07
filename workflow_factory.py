@@ -9,7 +9,7 @@ from delete_liked_tracks import DeleteLikedTracksWorkflow
 from liked_tracks_reader import SpotifyLikedTracksReader
 from liked_tracks_operations import LikedTracksDeleter, LikedTracksFinder
 from liked_tracks_remover import SpotifyLikedTracksRemover
-from playlist import PlaylistManager
+from playlist import SpotifyPlaylistManager
 from playlist_selection import TargetPlaylistSelector
 from playlist_track_adder import PlaylistTrackAdder
 from transfer import TransferLikedTracksWorkflow
@@ -66,7 +66,7 @@ class WorkflowFactory:
 
     def _create_transfer_workflow(self) -> TransferLikedTracksWorkflow:
         """Создать сценарий переноса любимых треков."""
-        playlist_manager = PlaylistManager(self.spotify, self.user["id"])
+        playlist_manager = SpotifyPlaylistManager(self.spotify, self.user["id"])
 
         return TransferLikedTracksWorkflow(
             self.ui,

@@ -5,7 +5,7 @@ import logging
 from typing import TYPE_CHECKING, Literal, TypeAlias
 
 from api.types import SpotifyPlaylist
-from playlist import PlaylistManager
+from playlist import SpotifyPlaylistManager
 from playlist_id_parser import parse_playlist_id
 
 if TYPE_CHECKING:
@@ -28,7 +28,7 @@ class TargetPlaylistSelector:
 
     def __init__(
         self,
-        playlist_manager: PlaylistManager,
+        playlist_manager: SpotifyPlaylistManager,
         ui: UserInterface,
     ) -> None:
         self.playlist_manager = playlist_manager

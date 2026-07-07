@@ -10,7 +10,7 @@ PLAYLIST_PAGE_LIMIT = 50
 logger = logging.getLogger(__name__)
 
 
-class PlaylistManager:
+class SpotifyPlaylistManager:
     """Работает с плейлистами текущего пользователя Spotify."""
 
     def __init__(
