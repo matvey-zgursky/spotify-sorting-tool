@@ -23,7 +23,7 @@ class SpotifyPlaylistManager:
         self.current_user_id = current_user_id
         self.page_limit = page_limit
 
-    def get_user_playlists(self) -> list[SpotifyPlaylist]:
+    def get_current_user_playlists(self) -> list[SpotifyPlaylist]:
         """Вернуть все плейлисты из медиатеки текущего пользователя."""
         playlists: list[SpotifyPlaylist] = []
         offset = 0
@@ -52,7 +52,7 @@ class SpotifyPlaylistManager:
 
     def find_by_id(self, playlist_id: str) -> SpotifyPlaylist | None:
         """Найти плейлист в медиатеке пользователя по id."""
-        for playlist in self.get_user_playlists():
+        for playlist in self.get_current_user_playlists():
             if playlist["id"] == playlist_id:
                 return playlist
 
@@ -62,7 +62,7 @@ class SpotifyPlaylistManager:
         """Найти плейлисты в медиатеке пользователя по точному названию."""
         return [
             playlist
-            for playlist in self.get_user_playlists()
+            for playlist in self.get_current_user_playlists()
             if playlist["name"] == name
         ]
 
