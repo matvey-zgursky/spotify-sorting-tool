@@ -93,24 +93,26 @@ def _parse_track(raw: Any, context: str) -> SpotifyTrack:
 def _parse_playlist_item(raw: Any) -> SpotifyPlaylistItem:
     """Нормализовать элемент плейлиста, мягко пропуская невалидный трек."""
     if not isinstance(raw, Mapping):
-        logger.debug("Playlist item skipped: item is not a mapping")
-        return {"item": None}
+        return _skip_playlist_item("item is not a mapping")
 
     track = raw.get("item")
     if track is None:
-        logger.debug("Playlist item skipped: track is missing")
-        return {"item": None}
+        return _skip_playlist_item("track is missing")
 
     if not isinstance(track, Mapping):
-        logger.debug("Playlist item skipped: track is not a mapping")
-        return {"item": None}
+        return _skip_playlist_item("track is not a mapping")
 
     track_uri = track.get("uri")
     if not isinstance(track_uri, str) or not track_uri:
-        logger.debug("Playlist item skipped: track URI is missing")
-        return {"item": None}
+        return _skip_playlist_item("track URI is missing")
 
     return {"item": {"uri": track_uri}}
+
+
+def _skip_playlist_item(reason: str) -> SpotifyPlaylistItem:
+    """Вернуть пустой элемент плейлиста и записать причину пропуска."""
+    logger.debug("Playlist item skipped: %s", reason)
+    return {"item": None}
 
 
 def _parse_playlists_page_items(raw_items: list[Any]) -> list[SpotifyPlaylist]:
