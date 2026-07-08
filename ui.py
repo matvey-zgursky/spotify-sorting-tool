@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import date
 from typing import TYPE_CHECKING
 
-from actions import UserAction
+from workflows.actions import UserAction
 from api.types import SpotifyPlaylist, SpotifyUser
 
 if TYPE_CHECKING:
