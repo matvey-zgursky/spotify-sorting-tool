@@ -23,6 +23,13 @@ T = TypeVar("T")
 
 logger = logging.getLogger(__name__)
 
+SPOTIFY_ERROR_BY_STATUS = {
+    401: SpotifyAuthorizationError,
+    403: SpotifyPermissionError,
+    404: SpotifyResourceNotFoundError,
+    429: SpotifyRateLimitError,
+}
+
 
 def call_spotify(
     operation: Callable[..., T],
@@ -101,14 +108,10 @@ def _map_spotify_error(error: SpotifyException) -> SpotifyAppError:
     """Преобразовать ошибку spotipy в ошибку приложения."""
     status = getattr(error, "http_status", None)
 
-    if status == 401:
-        return SpotifyAuthorizationError()
-    if status == 403:
-        return SpotifyPermissionError()
-    if status == 404:
-        return SpotifyResourceNotFoundError()
-    if status == 429:
-        return SpotifyRateLimitError()
+    error_class = SPOTIFY_ERROR_BY_STATUS.get(status)
+    if error_class is not None:
+        return error_class()
+
     if _is_server_error(status):
         return SpotifyServerError()
 

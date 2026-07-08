@@ -1,12 +1,17 @@
 import logging
+from collections.abc import Callable
 from typing import Protocol
 
 from actions import UserAction
+from api.client import SpotifyClient
 from api.types import SpotifyUser
 from delete_liked_tracks import DeleteLikedTracksWorkflow
-from liked_tracks import LikedTrackRemover, LikedTracks
-from playlist import PlaylistManager, PlaylistTrackAdder, TargetPlaylistSelector
-from api.client import SpotifyClient
+from liked_tracks_reader import SpotifyLikedTracksReader
+from liked_tracks_operations import LikedTracksDeleter, LikedTracksFinder
+from liked_tracks_remover import SpotifyLikedTracksRemover
+from playlist_manager import SpotifyPlaylistManager
+from playlist_selection import TargetPlaylistSelector
+from playlist_track_adder import PlaylistTrackAdder
 from transfer import TransferLikedTracksWorkflow
 from ui import UserInterface
 
@@ -38,36 +43,19 @@ class WorkflowFactory:
         action_value = action.value
         logger.debug("Workflow creation requested: action=%s", action_value)
 
-        if action == UserAction.TRANSFER_LIKED_TRACKS:
-            playlist_manager = PlaylistManager(self.spotify, self.user["id"])
-            playlist_selector = TargetPlaylistSelector(
-                playlist_manager,
-                self.ui,
-            )
-            liked_tracks = LikedTracks(self.spotify)
-            track_adder = PlaylistTrackAdder(self.spotify)
-            track_remover = LikedTrackRemover(self.spotify)
-            workflow = TransferLikedTracksWorkflow(
-                self.ui,
-                playlist_selector,
-                liked_tracks,
-                track_adder,
-                track_remover,
-            )
-        elif action == UserAction.DELETE_LIKED_TRACKS:
-            liked_tracks = LikedTracks(self.spotify)
-            track_remover = LikedTrackRemover(self.spotify)
-            workflow = DeleteLikedTracksWorkflow(
-                self.ui,
-                liked_tracks,
-                track_remover,
-            )
-        else:
+        workflow_creators: dict[UserAction, Callable[[], Workflow]] = {
+            UserAction.TRANSFER_LIKED_TRACKS: self._create_transfer_workflow,
+            UserAction.DELETE_LIKED_TRACKS: self._create_delete_workflow,
+        }
+
+        try:
+            workflow = workflow_creators[action]()
+        except KeyError:
             logger.error(
                 "Unsupported workflow action requested: action=%s",
                 action_value,
             )
-            raise ValueError(f"Unsupported user action: {action_value}")
+            raise ValueError(f"Unsupported user action: {action_value}") from None
 
         logger.debug(
             "Workflow created: action=%s workflow=%s",
@@ -75,3 +63,23 @@ class WorkflowFactory:
             workflow.__class__.__name__,
         )
         return workflow
+
+    def _create_transfer_workflow(self) -> TransferLikedTracksWorkflow:
+        """Создать сценарий переноса любимых треков."""
+        playlist_manager = SpotifyPlaylistManager(self.spotify, self.user["id"])
+
+        return TransferLikedTracksWorkflow(
+            self.ui,
+            TargetPlaylistSelector(playlist_manager, self.ui),
+            LikedTracksFinder(self.ui, SpotifyLikedTracksReader(self.spotify)),
+            PlaylistTrackAdder(self.spotify),
+            LikedTracksDeleter(self.ui, SpotifyLikedTracksRemover(self.spotify)),
+        )
+
+    def _create_delete_workflow(self) -> DeleteLikedTracksWorkflow:
+        """Создать сценарий удаления любимых треков."""
+        return DeleteLikedTracksWorkflow(
+            self.ui,
+            LikedTracksFinder(self.ui, SpotifyLikedTracksReader(self.spotify)),
+            LikedTracksDeleter(self.ui, SpotifyLikedTracksRemover(self.spotify)),
+        )
