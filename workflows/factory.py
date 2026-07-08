@@ -5,9 +5,9 @@ from typing import Protocol
 from workflows.actions import UserAction
 from api.client import SpotifyClient
 from api.types import SpotifyUser
-from liked_tracks_reader import SpotifyLikedTracksReader
-from liked_tracks_operations import LikedTracksDeleter, LikedTracksFinder
-from liked_tracks_remover import SpotifyLikedTracksRemover
+from liked_tracks.reader import SpotifyLikedTracksReader
+from liked_tracks.operations import LikedTracksDeleter, LikedTracksFinder
+from liked_tracks.remover import SpotifyLikedTracksRemover
 from playlist_manager import SpotifyPlaylistManager
 from playlist_selection import TargetPlaylistSelector
 from playlist_track_adder import PlaylistTrackAdder

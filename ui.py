@@ -7,7 +7,7 @@ from workflows.actions import UserAction
 from api.types import SpotifyPlaylist, SpotifyUser
 
 if TYPE_CHECKING:
-    from liked_tracks_remover import RemoveTracksResult
+    from liked_tracks.remover import RemoveTracksResult
     from playlist_track_adder import AddTracksResult
 
 MIN_SPOTIFY_YEAR = 2008
