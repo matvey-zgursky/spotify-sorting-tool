@@ -9,9 +9,9 @@ from liked_tracks.deleter import LikedTracksDeleter
 from liked_tracks.finder import LikedTracksFinder
 from liked_tracks.spotify_reader import SpotifyLikedTracksReader
 from liked_tracks.spotify_remover import SpotifyLikedTracksRemover
-from playlist_manager import SpotifyPlaylistManager
-from playlist_selection import TargetPlaylistSelector
-from playlist_track_adder import PlaylistTrackAdder
+from playlist.manager import SpotifyPlaylistManager
+from playlist.selection import TargetPlaylistSelector
+from playlist.track_adder import PlaylistTrackAdder
 from ui import UserInterface
 from workflows.delete_liked_tracks import DeleteLikedTracksWorkflow
 from workflows.transfer_liked_tracks import TransferLikedTracksWorkflow

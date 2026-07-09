@@ -8,7 +8,7 @@ from api.types import SpotifyPlaylist, SpotifyUser
 
 if TYPE_CHECKING:
     from liked_tracks.spotify_remover import RemoveTracksResult
-    from playlist_track_adder import AddTracksResult
+    from playlist.track_adder import AddTracksResult
 
 MIN_SPOTIFY_YEAR = 2008
 UNTITLED_PLAYLIST_NAME = "[untitled playlist]"
