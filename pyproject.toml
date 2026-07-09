@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spotify-manager"
+version = "0.1.0"
+description = "Console manager for Spotify liked tracks."
+requires-python = ">=3.11"
+dependencies = [
+    "spotipy>=2.24,<3",
+    "python-dotenv>=1.0,<2",
+    "requests>=2,<3",
+]
+
+[project.scripts]
+spotify-manager = "spotify_manager.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

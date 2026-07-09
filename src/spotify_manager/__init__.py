@@ -1,0 +1,1 @@
+"""Spotify liked tracks manager."""

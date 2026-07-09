@@ -1,14 +1,14 @@
 import spotipy
 
-from api.parsers import (
+from .parsers import (
     parse_playlist,
     parse_playlist_items_page,
     parse_playlists_page,
     parse_saved_tracks_page,
     parse_user,
 )
-from api.request_executor import call_spotify
-from api.types import (
+from .request_executor import call_spotify
+from .types import (
     SpotifyPlaylist,
     SpotifyPlaylistItemsPage,
     SpotifyPlaylistsPage,

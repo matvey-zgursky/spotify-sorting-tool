@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import logging
 
-from api.client import SpotifyClient
-from api.types import SpotifyPlaylist
+from ..api.client import SpotifyClient
+from ..api.types import SpotifyPlaylist
 
 PLAYLIST_PAGE_LIMIT = 50
 

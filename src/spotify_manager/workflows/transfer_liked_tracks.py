@@ -1,14 +1,15 @@
 import logging
 
-from api.types import SpotifyPlaylist
-from liked_tracks_operations import LikedTracksDeleter, LikedTracksFinder
-from playlist_selection import TargetPlaylistSelector
-from playlist_track_adder import (
+from ..api.types import SpotifyPlaylist
+from ..liked_tracks.deleter import LikedTracksDeleter
+from ..liked_tracks.finder import LikedTracksFinder
+from ..playlist.selection import TargetPlaylistSelector
+from ..playlist.track_adder import (
     AddTracksResult,
     PlaylistTrackAddError,
-    PlaylistTrackAdder,
+    SpotifyPlaylistTrackAdder,
 )
-from ui import UserInterface
+from ..ui import UserInterface
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ class TransferLikedTracksWorkflow:
         ui: UserInterface,
         playlist_selector: TargetPlaylistSelector,
         liked_tracks_finder: LikedTracksFinder,
-        track_adder: PlaylistTrackAdder,
+        track_adder: SpotifyPlaylistTrackAdder,
         liked_tracks_deleter: LikedTracksDeleter,
     ) -> None:
         self.ui = ui

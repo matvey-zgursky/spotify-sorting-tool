@@ -5,8 +5,8 @@ import webbrowser
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
-from api.client import SpotifyClient
-from errors import SpotifySettingsError
+from .api.client import SpotifyClient
+from .errors import SpotifySettingsError
 
 logger = logging.getLogger(__name__)
 

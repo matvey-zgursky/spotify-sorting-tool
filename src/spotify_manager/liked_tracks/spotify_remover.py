@@ -2,8 +2,8 @@ import logging
 from dataclasses import dataclass
 from collections.abc import Iterator
 
-from api.client import SpotifyClient
-from errors import SpotifyAppError
+from ..api.client import SpotifyClient
+from ..errors import SpotifyAppError
 
 SAVED_TRACKS_DELETE_LIMIT = 40
 
