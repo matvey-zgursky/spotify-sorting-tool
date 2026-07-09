@@ -29,7 +29,7 @@ class PlaylistTrackAddError(SpotifyAppError):
         super().__init__(str(cause))
 
 
-class PlaylistTrackAdder:
+class SpotifyPlaylistTrackAdder:
     """Добавляет треки в плейлист."""
 
     def __init__(

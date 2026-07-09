@@ -11,7 +11,7 @@ from liked_tracks.spotify_reader import SpotifyLikedTracksReader
 from liked_tracks.spotify_remover import SpotifyLikedTracksRemover
 from playlist.manager import SpotifyPlaylistManager
 from playlist.selection import TargetPlaylistSelector
-from playlist.track_adder import PlaylistTrackAdder
+from playlist.track_adder import SpotifyPlaylistTrackAdder
 from ui import UserInterface
 from workflows.delete_liked_tracks import DeleteLikedTracksWorkflow
 from workflows.transfer_liked_tracks import TransferLikedTracksWorkflow
@@ -73,7 +73,7 @@ class WorkflowFactory:
             self.ui,
             TargetPlaylistSelector(playlist_manager, self.ui),
             LikedTracksFinder(self.ui, SpotifyLikedTracksReader(self.spotify)),
-            PlaylistTrackAdder(self.spotify),
+            SpotifyPlaylistTrackAdder(self.spotify),
             LikedTracksDeleter(self.ui, SpotifyLikedTracksRemover(self.spotify)),
         )
 

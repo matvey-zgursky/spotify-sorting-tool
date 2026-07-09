@@ -7,7 +7,7 @@ from playlist.selection import TargetPlaylistSelector
 from playlist.track_adder import (
     AddTracksResult,
     PlaylistTrackAddError,
-    PlaylistTrackAdder,
+    SpotifyPlaylistTrackAdder,
 )
 from ui import UserInterface
 
@@ -22,7 +22,7 @@ class TransferLikedTracksWorkflow:
         ui: UserInterface,
         playlist_selector: TargetPlaylistSelector,
         liked_tracks_finder: LikedTracksFinder,
-        track_adder: PlaylistTrackAdder,
+        track_adder: SpotifyPlaylistTrackAdder,
         liked_tracks_deleter: LikedTracksDeleter,
     ) -> None:
         self.ui = ui
