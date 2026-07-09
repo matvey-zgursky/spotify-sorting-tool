@@ -2,9 +2,9 @@ import logging
 
 from dotenv import load_dotenv
 
-from app import App
-from errors import SpotifyAppError
-from logging_config import configure_logging
+from .app import App
+from .errors import SpotifyAppError
+from .logging_config import configure_logging
 
 logger = logging.getLogger(__name__)
 

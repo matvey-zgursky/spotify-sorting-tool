@@ -4,3 +4,4 @@ __pycache__/
 .spotify_token_cache
 logs/
 *.py[cod]
+*.egg-info/

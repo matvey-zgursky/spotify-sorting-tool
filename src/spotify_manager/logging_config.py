@@ -5,7 +5,7 @@ from pathlib import Path
 DEFAULT_LOG_LEVEL = "INFO"
 DEFAULT_LOG_FILE = "logs/app.log"
 LOG_FORMAT = "%(asctime)s %(levelname)s [%(name)s] %(message)s"
-PROJECT_ROOT = Path(__file__).resolve().parent
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 THIRD_PARTY_LOG_LEVELS = {
     "spotipy": logging.WARNING,
     "urllib3": logging.WARNING,

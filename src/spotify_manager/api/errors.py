@@ -1,4 +1,4 @@
-from errors import SpotifyAppError
+from ..errors import SpotifyAppError
 
 
 class SpotifyAuthorizationError(SpotifyAppError):

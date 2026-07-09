@@ -2,8 +2,8 @@ from collections.abc import Mapping
 import logging
 from typing import Any
 
-from api.errors import SpotifyResponseError
-from api.types import (
+from .errors import SpotifyResponseError
+from .types import (
     SpotifyPlaylist,
     SpotifyPlaylistItem,
     SpotifyPlaylistItemsPage,

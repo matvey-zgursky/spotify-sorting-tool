@@ -1,8 +1,8 @@
 import logging
 
-from liked_tracks.deleter import LikedTracksDeleter
-from liked_tracks.finder import LikedTracksFinder
-from ui import UserInterface
+from ..liked_tracks.deleter import LikedTracksDeleter
+from ..liked_tracks.finder import LikedTracksFinder
+from ..ui import UserInterface
 
 logger = logging.getLogger(__name__)
 

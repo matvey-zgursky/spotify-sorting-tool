@@ -1,8 +1,8 @@
 import logging
 from dataclasses import dataclass
 
-from api.client import SpotifyClient
-from api.types import SpotifySavedTracksPage
+from ..api.client import SpotifyClient
+from ..api.types import SpotifySavedTracksPage
 
 SAVED_TRACKS_PAGE_LIMIT = 50
 

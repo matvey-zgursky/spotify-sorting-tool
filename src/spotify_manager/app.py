@@ -1,10 +1,10 @@
 import logging
 from typing import Self
 
-from api.types import SpotifyUser
-from auth import Authenticator
-from ui import UserInterface
-from workflows.factory import WorkflowFactory
+from .api.types import SpotifyUser
+from .auth import Authenticator
+from .ui import UserInterface
+from .workflows.factory import WorkflowFactory
 
 logger = logging.getLogger(__name__)
 

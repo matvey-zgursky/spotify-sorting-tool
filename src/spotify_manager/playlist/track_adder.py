@@ -2,8 +2,8 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 import logging
 
-from api.client import SpotifyClient
-from errors import SpotifyAppError
+from ..api.client import SpotifyClient
+from ..errors import SpotifyAppError
 
 ADD_ITEMS_LIMIT = 100
 PLAYLIST_ITEMS_LIMIT = 100

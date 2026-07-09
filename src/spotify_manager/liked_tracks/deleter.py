@@ -3,13 +3,13 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from liked_tracks.spotify_remover import (
+from .spotify_remover import (
     LikedTrackRemoveError,
     SpotifyLikedTracksRemover,
 )
 
 if TYPE_CHECKING:
-    from ui import UserInterface
+    from ..ui import UserInterface
 
 logger = logging.getLogger(__name__)
 

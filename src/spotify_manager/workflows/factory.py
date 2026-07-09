@@ -2,19 +2,19 @@ import logging
 from collections.abc import Callable
 from typing import Protocol
 
-from workflows.actions import UserAction
-from api.client import SpotifyClient
-from api.types import SpotifyUser
-from liked_tracks.deleter import LikedTracksDeleter
-from liked_tracks.finder import LikedTracksFinder
-from liked_tracks.spotify_reader import SpotifyLikedTracksReader
-from liked_tracks.spotify_remover import SpotifyLikedTracksRemover
-from playlist.manager import SpotifyPlaylistManager
-from playlist.selection import TargetPlaylistSelector
-from playlist.track_adder import SpotifyPlaylistTrackAdder
-from ui import UserInterface
-from workflows.delete_liked_tracks import DeleteLikedTracksWorkflow
-from workflows.transfer_liked_tracks import TransferLikedTracksWorkflow
+from .actions import UserAction
+from ..api.client import SpotifyClient
+from ..api.types import SpotifyUser
+from ..liked_tracks.deleter import LikedTracksDeleter
+from ..liked_tracks.finder import LikedTracksFinder
+from ..liked_tracks.spotify_reader import SpotifyLikedTracksReader
+from ..liked_tracks.spotify_remover import SpotifyLikedTracksRemover
+from ..playlist.manager import SpotifyPlaylistManager
+from ..playlist.selection import TargetPlaylistSelector
+from ..playlist.track_adder import SpotifyPlaylistTrackAdder
+from ..ui import UserInterface
+from .delete_liked_tracks import DeleteLikedTracksWorkflow
+from .transfer_liked_tracks import TransferLikedTracksWorkflow
 
 logger = logging.getLogger(__name__)
 

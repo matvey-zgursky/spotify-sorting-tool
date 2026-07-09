@@ -6,7 +6,7 @@ from typing import Any, TypeVar
 import requests
 from spotipy.exceptions import SpotifyException
 
-from api.errors import (
+from .errors import (
     SpotifyAuthorizationError,
     SpotifyNetworkError,
     SpotifyPermissionError,
@@ -14,7 +14,7 @@ from api.errors import (
     SpotifyResourceNotFoundError,
     SpotifyServerError,
 )
-from errors import SpotifyAppError
+from ..errors import SpotifyAppError
 
 MAX_RETRIES = 3
 DEFAULT_RETRY_AFTER_SECONDS = 1

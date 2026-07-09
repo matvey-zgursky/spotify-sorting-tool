@@ -3,12 +3,12 @@ from __future__ import annotations
 from datetime import date
 from typing import TYPE_CHECKING
 
-from workflows.actions import UserAction
-from api.types import SpotifyPlaylist, SpotifyUser
+from .workflows.actions import UserAction
+from .api.types import SpotifyPlaylist, SpotifyUser
 
 if TYPE_CHECKING:
-    from liked_tracks.spotify_remover import RemoveTracksResult
-    from playlist.track_adder import AddTracksResult
+    from .liked_tracks.spotify_remover import RemoveTracksResult
+    from .playlist.track_adder import AddTracksResult
 
 MIN_SPOTIFY_YEAR = 2008
 UNTITLED_PLAYLIST_NAME = "[untitled playlist]"
